@@ -23,11 +23,13 @@ export async function onRequest(context) {
         CASE
           WHEN type = 'task' AND importance IS NOT NULL THEN
             ROUND(
-              importance::numeric
-              / GREATEST(
-                  DATE_PART('day', due_date::timestamp - CURRENT_DATE::timestamp),
-                  1
-                ),
+              (
+                importance::numeric
+                / GREATEST(
+                    DATE_PART('day', due_date::timestamp - CURRENT_DATE::timestamp),
+                    1
+                  )
+              )::numeric,
               2
             )
           ELSE NULL
