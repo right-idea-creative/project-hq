@@ -1,0 +1,24 @@
+{
+  "name": "project-hq",
+  "version": "1.0.0",
+  "description": "A spatial canvas for personal life organization. Nodes are widgets (countdown, checklist, hero-todo, sticky note, brainstorm cluster) that read from a shared data layer. The canvas is the frontend; the table is the spine.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/right-idea-creative/project-hq.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/right-idea-creative/project-hq/issues"
+  },
+  "homepage": "https://github.com/right-idea-creative/project-hq#readme",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0"
+  }
+}

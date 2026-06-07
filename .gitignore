@@ -1,0 +1,13 @@
+# Dependencies — rebuildable from package.json, never commit
+node_modules/
+
+# Secrets — connection strings, API keys. NEVER commit these.
+.dev.vars
+.env
+.env.local
+
+# Cloudflare local build output
+.wrangler/
+
+# OS noise
+.DS_Store
