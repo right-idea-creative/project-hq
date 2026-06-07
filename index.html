@@ -3,190 +3,375 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>lifeweb</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<title>project-hq</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css" rel="stylesheet" />
 <style>
   :root {
-    --bg: #11100e;
-    --bg-grid: #1c1a17;
-    --ink: #ece6da;
-    --ink-dim: #8c857a;
-    --hex-fill: #1a1815;
-    --hex-stroke: #3a352d;
-    --accent: #c4783f;
-    --accent-soft: #6b4427;
+    --bg-page: #f4f3ee;
+    --bg-surface: #eceadf;
+    --bg-card: #ffffff;
+    --text-1: #2c2c2a;
+    --text-2: #5f5e5a;
+    --text-3: #97958c;
+    --border: rgba(0,0,0,0.12);
+    --border-2: rgba(0,0,0,0.22);
+    --radius: 12px;
+    --radius-md: 8px;
+    --hot: #d85a30;
+    --cool: #378add;
+    --trip: #185fa5;
+    --milestone: #993c1d;
   }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-1);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  h1 { font-size: 20px; font-weight: 500; margin: 0 0 1.25rem; color: var(--text-1); }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .tabs { display:flex; gap:2px; align-items:flex-end; padding-left:6px; position:relative; z-index:2; }
+  .tab { display:flex; align-items:center; gap:6px; font-size:13px; padding:8px 16px; border:0.5px solid var(--border); border-bottom:none; border-radius:8px 8px 0 0; cursor:pointer; color:var(--text-2); background:var(--bg-surface); position:relative; top:0.5px; user-select:none; }
+  .tab.active { background:var(--bg-card); color:var(--text-1); margin-bottom:-0.5px; padding-bottom:9px; }
+  .tab:not(.active):hover { color:var(--text-1); }
 
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'Fraunces', serif;
-    overflow: hidden;
-  }
+  .panel { background:var(--bg-card); border:0.5px solid var(--border); border-radius:0 var(--radius) var(--radius) var(--radius); padding:1rem; position:relative; z-index:1; min-height:200px; }
 
-  /* The infinite canvas surface — pannable */
-  #canvas {
-    position: absolute;
-    inset: 0;
-    cursor: grab;
-    background-color: var(--bg);
-    background-image:
-      radial-gradient(circle at 1px 1px, var(--bg-grid) 1.5px, transparent 0);
-    background-size: 38px 38px;
-  }
-  #canvas:active { cursor: grabbing; }
+  .addbar { background:var(--bg-surface); border:0.5px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:16px; }
+  .addrow { display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; }
+  .fld { display:flex; flex-direction:column; gap:4px; }
+  .fld label { font-size:11px; color:var(--text-3); padding-left:2px; }
+  input, select { height:36px; padding:0 10px; font-size:14px; border:0.5px solid var(--border-2); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-1); font-family:inherit; }
+  input:focus, select:focus { outline:none; box-shadow:0 0 0 2px rgba(55,138,221,0.35); }
+  button { height:36px; padding:0 14px; font-size:14px; border:0.5px solid var(--border-2); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-1); cursor:pointer; font-family:inherit; display:flex; align-items:center; }
+  button:hover { background:var(--bg-surface); }
+  button:active { transform:scale(0.98); }
 
-  /* The world layer that actually moves when you pan */
-  #world {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 0;
-    height: 0;
-    will-change: transform;
-  }
+  .card { background:var(--bg-card); border:0.5px solid var(--border); border-radius:var(--radius); margin-bottom:8px; overflow:hidden; }
+  .row { display:flex; align-items:stretch; cursor:pointer; }
+  .accent { width:4px; flex-shrink:0; }
+  .rowbody { display:flex; align-items:center; gap:14px; padding:12px 14px; flex:1; min-width:0; }
+  .check { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border-2); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; background:transparent; transition:all .12s; }
+  .check:hover { border-color:var(--text-2); }
+  .typeicon { width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .title { font-size:15px; color:var(--text-1); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pill { font-size:11px; padding:2px 9px; border-radius:999px; flex-shrink:0; white-space:nowrap; }
+  .urgwrap { width:80px; flex-shrink:0; height:6px; border-radius:999px; background:var(--border); overflow:hidden; }
+  .urgbar { height:100%; border-radius:999px; }
+  .span { font-size:12px; color:var(--text-2); flex-shrink:0; white-space:nowrap; }
+  .span .cd { color:var(--text-3); }
+  .chev { flex-shrink:0; font-size:16px; color:var(--text-3); transition:transform .15s; }
+  .expand { padding:0 16px 0 38px; max-height:0; overflow:hidden; transition:max-height .2s ease, padding .2s ease; }
+  .expand.open { max-height:400px; padding:0 16px 14px 38px; }
+  .bodytext { font-size:14px; line-height:1.6; color:var(--text-2); border-top:0.5px solid var(--border); padding-top:12px; white-space:pre-wrap; }
+  .bodytext.empty { color:var(--text-3); font-style:italic; }
 
-  /* A node sits centered on its (x,y) world coordinate */
-  .node {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    user-select: none;
-  }
+  .donetoggle { width:100%; justify-content:space-between; margin-top:12px; }
+  .donetoggle .cnt { color:var(--text-3); }
+  .donerow { display:flex; align-items:center; gap:12px; padding:8px 14px; font-size:13px; color:var(--text-3); }
+  .donerow .check { border-color:var(--text-3); background:var(--text-3); }
+  .donerow .title { font-size:13px; text-decoration:line-through; color:var(--text-3); }
+  .donerow .time { margin-left:auto; font-size:11px; color:var(--text-3); }
 
-  /* Hex shape via clip-path */
-  .hex {
-    width: 200px;
-    height: 220px;
-    background: var(--hex-fill);
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    transition: transform 0.18s ease, filter 0.18s ease;
-  }
-  .hex::before {
-    content: "";
-    position: absolute;
-    inset: 2px;
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    background:
-      linear-gradient(160deg, rgba(196,120,63,0.06), transparent 60%),
-      var(--hex-fill);
-    border: 0;
-    box-shadow: inset 0 0 0 1.5px var(--hex-stroke);
-    z-index: 0;
-  }
-  .hex:hover {
-    transform: scale(1.03);
-    filter: drop-shadow(0 8px 28px rgba(0,0,0,0.5));
-  }
-
-  .hex-inner {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    padding: 0 32px;
-  }
-  .hex-inner .plus {
-    font-family: 'Spline Sans Mono', monospace;
-    font-size: 34px;
-    color: var(--accent);
-    line-height: 1;
-  }
-  .hex-inner .label {
-    margin-top: 10px;
-    font-size: 13px;
-    letter-spacing: 0.08em;
-    color: var(--ink-dim);
-    text-transform: lowercase;
-  }
-
-  /* Top-left wordmark */
-  #brand {
-    position: fixed;
-    top: 22px;
-    left: 26px;
-    z-index: 10;
-    font-size: 19px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--ink);
-    pointer-events: none;
-  }
-  #brand .dot { color: var(--accent); }
-
-  /* Bottom hint */
-  #hint {
-    position: fixed;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    font-family: 'Spline Sans Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    color: var(--ink-dim);
-    pointer-events: none;
-    opacity: 0.7;
-  }
+  .state { text-align:center; padding:2.5rem 1rem; color:var(--text-3); font-size:14px; }
+  .placeholder { text-align:center; padding:3rem 1rem; color:var(--text-3); }
+  .placeholder i { font-size:32px; display:block; margin-bottom:10px; }
 </style>
 </head>
 <body>
-  <div id="brand">lifeweb<span class="dot">.</span></div>
+<div class="wrap">
+  <h1>project-hq</h1>
 
-  <div id="canvas">
-    <div id="world">
-      <!-- Single placeholder hex at world origin -->
-      <div class="node" style="left: 0px; top: 0px;">
-        <div class="hex">
-          <div class="hex-inner">
-            <div class="plus">+</div>
-            <div class="label">add a widget</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="tabs">
+    <div class="tab active" data-tab="list"><i class="ti ti-list-check"></i>List</div>
+    <div class="tab" data-tab="notes"><i class="ti ti-note"></i>Notes</div>
+    <div class="tab" data-tab="clusters"><i class="ti ti-affiliate"></i>Clusters</div>
+    <div class="tab" data-tab="agent"><i class="ti ti-sparkles"></i>Agent</div>
   </div>
 
-  <div id="hint">drag to pan · widgets &amp; data coming next</div>
+  <div class="panel">
+    <div id="panel-list">
+      <div class="addbar">
+        <div class="addrow">
+          <div class="fld" style="flex:1; min-width:160px;">
+            <label for="new-title">Title</label>
+            <input id="new-title" type="text" placeholder="Add an item…" />
+          </div>
+          <div class="fld" style="width:120px;">
+            <label for="new-type">Type</label>
+            <select id="new-type">
+              <option value="task">Task</option>
+              <option value="trip">Trip</option>
+              <option value="milestone">Milestone</option>
+            </select>
+          </div>
+          <div class="fld" style="width:120px;">
+            <label for="new-cat">Category</label>
+            <select id="new-cat">
+              <option value="">None</option>
+              <option value="finance">Finance</option>
+              <option value="dogs">Dogs</option>
+              <option value="projects">Projects</option>
+              <option value="house">House</option>
+              <option value="family">Friends &amp; family</option>
+            </select>
+          </div>
+          <div class="fld" id="fld-imp" style="width:70px;">
+            <label for="new-imp">Imp</label>
+            <select id="new-imp">
+              <option value="3">3</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div class="fld" id="fld-due" style="width:150px;">
+            <label for="new-due" id="lbl-due">Due</label>
+            <input id="new-due" type="date" />
+          </div>
+          <div class="fld" id="fld-end" style="width:150px; display:none;">
+            <label for="new-end">End</label>
+            <input id="new-end" type="date" />
+          </div>
+          <button id="add-btn"><i class="ti ti-plus" style="margin-right:4px;"></i>Add</button>
+        </div>
+      </div>
+
+      <div id="open-list"><div class="state">Loading…</div></div>
+
+      <button class="donetoggle" id="done-toggle" style="display:none;">
+        <span><i class="ti ti-chevron-right" id="done-chev" style="vertical-align:-2px; margin-right:6px;"></i>Done <span class="cnt" id="done-count"></span></span>
+      </button>
+      <div id="done-list" style="display:none; margin-top:6px;"></div>
+    </div>
+
+    <div id="panel-notes" style="display:none;">
+      <div class="placeholder"><i class="ti ti-note"></i>Notes — text items from the same table. Coming later.</div>
+    </div>
+    <div id="panel-clusters" style="display:none;">
+      <div class="placeholder"><i class="ti ti-affiliate"></i>Clusters — the spatial node view. Coming later.</div>
+    </div>
+    <div id="panel-agent" style="display:none;">
+      <div class="placeholder"><i class="ti ti-sparkles"></i>Agent — reads your tasks + the team's. The point of all this.</div>
+    </div>
+  </div>
+</div>
 
 <script>
-  // Minimal pan logic for the world layer. No data, no widgets yet —
-  // just enough that the canvas feels like a canvas.
-  (function () {
-    const world = document.getElementById('world');
-    const canvas = document.getElementById('canvas');
-    let ox = 0, oy = 0;          // current world offset
-    let sx = 0, sy = 0;          // pointer start
-    let dragging = false;
+const CATS = {
+  finance:  { fill:'#E1F5EE', text:'#0F6E56' },
+  dogs:     { fill:'#FAEEDA', text:'#854F0B' },
+  projects: { fill:'#EEEDFE', text:'#3C3489' },
+  house:    { fill:'#FBEAF0', text:'#72243E' },
+  family:   { fill:'#FCEBEB', text:'#791F1F' },
+};
+const CATLABEL = { finance:'Finance', dogs:'Dogs', projects:'Projects', house:'House', family:'Friends & family' };
+const DAY = 86400000;
 
-    function apply() {
-      world.style.transform = `translate(${ox}px, ${oy}px)`;
-    }
+let items = [];     // open items, rendered in the list
+let doneItems = []; // status = 'done', rendered in the collapsed section
+let openId = null;
 
-    canvas.addEventListener('pointerdown', (e) => {
-      dragging = true;
-      sx = e.clientX - ox;
-      sy = e.clientY - oy;
-      canvas.setPointerCapture(e.pointerId);
+function today0() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+function parseDate(s) { if (!s) return null; const d = new Date(s); d.setHours(0,0,0,0); return d; }
+function daysLeft(d) { if (!d) return null; return Math.round((d - today0()) / DAY); }
+function fmt(d) { return d ? d.toLocaleDateString([], { month:'short', day:'numeric' }) : ''; }
+function isoToday(offset) { const d = new Date(today0().getTime() + (offset||0)*DAY); return d.toISOString().slice(0,10); }
+
+// urgency comes back as a STRING ("5.00") or null — parse before use
+function urg(it) { return it.urgency == null ? null : parseFloat(it.urgency); }
+function maxUrg() { let m = 0; items.forEach(it => { const u = urg(it); if (u != null && u > m) m = u; }); return m || 1; }
+
+function ring(imp) {
+  if (imp == null) return '<div style="width:22px;height:22px;flex-shrink:0;"></div>';
+  const r = 9, c = 2 * Math.PI * r, off = c * (1 - imp/5);
+  return '<svg width="22" height="22" viewBox="0 0 22 22" style="flex-shrink:0;" aria-label="importance '+imp+' of 5"><circle cx="11" cy="11" r="'+r+'" fill="none" stroke="var(--border)" stroke-width="2.5"/><circle cx="11" cy="11" r="'+r+'" fill="none" stroke="var(--text-2)" stroke-width="2.5" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 11 11)"/></svg>';
+}
+function pill(cat) {
+  if (!cat || !CATS[cat]) return '<span style="width:0;"></span>';
+  const c = CATS[cat];
+  return '<span class="pill" style="background:'+c.fill+';color:'+c.text+';">'+(CATLABEL[cat]||cat)+'</span>';
+}
+function leftControl(it) {
+  if (it.type === 'task') return '<div class="check" data-id="'+it.id+'"></div>';
+  if (it.type === 'trip') return '<div class="typeicon" style="color:var(--trip);"><i class="ti ti-plane-tilt"></i></div>';
+  if (it.type === 'milestone') return '<div class="typeicon" style="color:var(--milestone);"><i class="ti ti-flag"></i></div>';
+  return '<div style="width:20px;flex-shrink:0;"></div>';
+}
+function rightControl(it, mx) {
+  if (it.type === 'trip') {
+    const s = parseDate(it.start_date), e = parseDate(it.due_date);
+    const dl = daysLeft(s);
+    const cd = dl == null ? '' : (dl > 0 ? 'in '+dl+'d' : (dl === 0 ? 'today' : 'now'));
+    return '<span class="span"><span class="cd">'+cd+'</span> · '+fmt(s)+(e ? ' – '+fmt(e) : '')+'</span>';
+  }
+  if (it.type === 'milestone') {
+    const d = parseDate(it.due_date), dl = daysLeft(d);
+    const cd = dl == null ? '' : (dl > 0 ? 'in '+dl+'d' : (dl === 0 ? 'today' : 'passed'));
+    return '<span class="span"><span class="cd">'+cd+'</span> · '+fmt(d)+'</span>';
+  }
+  const u = urg(it), hot = u != null && u >= mx*0.55;
+  const w = u == null ? 0 : Math.round((u/mx)*100);
+  return '<div class="urgwrap"><div class="urgbar" style="width:'+w+'%;background:'+(hot?'var(--hot)':'var(--cool)')+';"></div></div>';
+}
+function accentColor(it, mx) {
+  if (it.type === 'trip') return 'var(--cool)';
+  if (it.type === 'milestone') return 'var(--milestone)';
+  const u = urg(it);
+  if (u == null) return 'var(--border)';
+  return u >= mx*0.55 ? 'var(--hot)' : 'var(--cool)';
+}
+function cardBg(it) {
+  if (it.type === 'trip') return 'rgba(55,138,221,0.06)';
+  if (it.type === 'milestone') return 'rgba(216,90,48,0.06)';
+  return 'var(--bg-card)';
+}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function render() {
+  const mx = maxUrg();
+  const ol = document.getElementById('open-list');
+  if (!items.length) {
+    ol.innerHTML = '<div class="state">No open items.</div>';
+  } else {
+    ol.innerHTML = '';
+    items.forEach(it => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.background = cardBg(it);
+      const impSlot = it.type === 'task' ? ring(it.importance) : '<div style="width:22px;flex-shrink:0;"></div>';
+      const isOpen = openId === it.id;
+      const bodyHtml = (it.body && it.body.trim())
+        ? '<div class="bodytext">'+esc(it.body)+'</div>'
+        : '<div class="bodytext empty">No description.</div>';
+      card.innerHTML =
+        '<div class="row" data-row="'+it.id+'">'+
+          '<div class="accent" style="background:'+accentColor(it,mx)+';"></div>'+
+          '<div class="rowbody">'+
+            leftControl(it)+
+            '<span class="title">'+esc(it.title)+'</span>'+
+            pill(it.category)+
+            impSlot+
+            rightControl(it,mx)+
+            '<i class="ti ti-chevron-down chev" style="transform:rotate('+(isOpen?'180':'0')+'deg);"></i>'+
+          '</div>'+
+        '</div>'+
+        '<div class="expand'+(isOpen?' open':'')+'">'+bodyHtml+'</div>';
+      ol.appendChild(card);
     });
-    canvas.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      ox = e.clientX - sx;
-      oy = e.clientY - sy;
-      apply();
+    ol.querySelectorAll('.row').forEach(row => {
+      row.onclick = (e) => {
+        if (e.target.closest('.check')) return;
+        const id = row.dataset.row;
+        openId = openId === id ? null : id;
+        render();
+      };
     });
-    canvas.addEventListener('pointerup', () => { dragging = false; });
-    canvas.addEventListener('pointercancel', () => { dragging = false; });
+    ol.querySelectorAll('.check').forEach(el => {
+      el.onclick = (e) => { e.stopPropagation(); markDone(el.dataset.id); };
+    });
+  }
+  renderDone();
+}
 
-    apply();
-  })();
+function renderDone() {
+  const toggle = document.getElementById('done-toggle');
+  const list = document.getElementById('done-list');
+  if (!doneItems.length) { toggle.style.display = 'none'; list.style.display = 'none'; return; }
+  toggle.style.display = 'flex';
+  document.getElementById('done-count').textContent = '('+doneItems.length+')';
+  list.innerHTML = '';
+  doneItems.forEach(it => {
+    const t = it.completed_at ? new Date(it.completed_at).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }) : '';
+    const row = document.createElement('div');
+    row.className = 'donerow';
+    row.innerHTML =
+      '<div class="check"><i class="ti ti-check" style="font-size:13px;color:var(--bg-card);"></i></div>'+
+      '<span class="title">'+esc(it.title)+'</span>'+
+      '<span class="time">'+t+'</span>';
+    list.appendChild(row);
+  });
+}
+
+// optimistic: move the card now, fire the write, reload on completion.
+// markDone currently updates UI only — the /api/done function is the next file.
+function markDone(id) {
+  const i = items.findIndex(it => it.id === id);
+  if (i < 0) return;
+  const it = items.splice(i, 1)[0];
+  it.status = 'done';
+  it.completed_at = new Date().toISOString();
+  doneItems.unshift(it);
+  if (openId === id) openId = null;
+  render();
+  // TODO next push:
+  // fetch('/api/done', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id }) })
+  //   .then(load);
+}
+
+async function load() {
+  try {
+    const res = await fetch('/api/tasks');
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error(data.error || 'bad response');
+    // id comes back as a STRING already; keep it as-is for comparisons
+    items = data.filter(it => it.status !== 'done');
+    doneItems = data.filter(it => it.status === 'done');
+    render();
+  } catch (err) {
+    document.getElementById('open-list').innerHTML =
+      '<div class="state">Couldn’t load tasks: '+esc(String(err.message||err))+'</div>';
+  }
+}
+
+// add form — UI only for now; wires to /api/add next push
+const newType = document.getElementById('new-type');
+const fldImp = document.getElementById('fld-imp');
+const fldEnd = document.getElementById('fld-end');
+const lblDue = document.getElementById('lbl-due');
+function syncForm() {
+  const t = newType.value;
+  fldImp.style.display = t === 'task' ? 'flex' : 'none';
+  fldEnd.style.display = t === 'trip' ? 'flex' : 'none';
+  lblDue.textContent = t === 'trip' ? 'Start' : (t === 'milestone' ? 'Date' : 'Due');
+}
+newType.onchange = syncForm;
+syncForm();
+document.getElementById('new-due').value = isoToday(7);
+
+document.getElementById('add-btn').onclick = () => {
+  const title = document.getElementById('new-title').value.trim();
+  if (!title) return;
+  alert('Add form is wired in the next push (needs the /api/add function).');
+  // TODO next push: build the payload by type and POST to /api/add, then load()
+};
+document.getElementById('new-title').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('add-btn').click();
+});
+
+document.getElementById('done-toggle').onclick = () => {
+  const list = document.getElementById('done-list');
+  const ch = document.getElementById('done-chev');
+  const isOpen = list.style.display !== 'none';
+  list.style.display = isOpen ? 'none' : 'block';
+  ch.className = isOpen ? 'ti ti-chevron-right' : 'ti ti-chevron-down';
+};
+
+const PANELS = ['list','notes','clusters','agent'];
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    const t = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === tab));
+    PANELS.forEach(p => { document.getElementById('panel-'+p).style.display = p === t ? 'block' : 'none'; });
+  };
+});
+
+load();
 </script>
 </body>
 </html>
