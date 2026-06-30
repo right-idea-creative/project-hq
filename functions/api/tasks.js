@@ -33,28 +33,26 @@ async function readList(sql) {
       due_date,
       status,
       completed_at,
+      urgent_pin,
       GREATEST(
         DATE_PART('day', COALESCE(due_date, start_date)::timestamp - CURRENT_DATE::timestamp),
         0
       ) AS days_left,
-      CASE
-        WHEN type IN ('task', 'initiative') AND importance IS NOT NULL THEN
-          ROUND(
-            (
-              importance::numeric
-              / GREATEST(
-                  DATE_PART('day', due_date::timestamp - CURRENT_DATE::timestamp),
-                  1
-                )
-            )::numeric,
-            2
-          )
-        ELSE NULL
-      END AS urgency
+      -- urgent if manually pinned, OR (importance >= 4 AND due within the next 2 days)
+      (
+        urgent_pin
+        OR (
+          type IN ('task', 'initiative')
+          AND importance >= 4
+          AND due_date IS NOT NULL
+          AND DATE_PART('day', due_date::timestamp - CURRENT_DATE::timestamp) BETWEEN 0 AND 2
+        )
+      ) AS is_urgent
     FROM items
     WHERE type IN ('task', 'initiative', 'trip', 'milestone')
       AND NOT (type = 'milestone' AND due_date < CURRENT_DATE)
-    ORDER BY COALESCE(start_date, due_date) ASC NULLS LAST
+      AND NOT (type = 'trip' AND due_date IS NOT NULL AND due_date < CURRENT_DATE)
+    ORDER BY COALESCE(due_date, start_date) ASC NULLS LAST, importance DESC NULLS LAST
   `;
   return json(rows, 200);
 }
@@ -80,16 +78,17 @@ async function addItem(sql, context) {
   const bodyText = b.body || null;
   const importance =
     URGENT_TYPES.includes(type) && b.importance != null ? Number(b.importance) : null;
+  const urgentPin = b.urgent_pin === true;
   const { start_date, due_date } = datesFor(type, b);
 
   const rows = await sql`
     INSERT INTO items
-      (title, type, category, importance, body, start_date, due_date, status, last_tended_at)
+      (title, type, category, importance, body, start_date, due_date, status, urgent_pin, last_tended_at)
     VALUES
       (${title}, ${type}, ${category}, ${importance}, ${bodyText},
-       ${start_date}, ${due_date}, 'open', NOW())
+       ${start_date}, ${due_date}, 'open', ${urgentPin}, NOW())
     RETURNING id, title, type, category, importance, body,
-              start_date, due_date, status, completed_at
+              start_date, due_date, status, completed_at, urgent_pin
   `;
   return json(rows[0], 200);
 }
@@ -109,6 +108,7 @@ async function editItem(sql, context) {
   const bodyText = b.body || null;
   const importance =
     URGENT_TYPES.includes(type) && b.importance != null ? Number(b.importance) : null;
+  const urgentPin = b.urgent_pin === true;
   const { start_date, due_date } = datesFor(type, b);
 
   const rows = await sql`
@@ -120,10 +120,11 @@ async function editItem(sql, context) {
         body = ${bodyText},
         start_date = ${start_date},
         due_date = ${due_date},
+        urgent_pin = ${urgentPin},
         last_tended_at = NOW()
     WHERE id = ${id}
     RETURNING id, title, type, category, importance, body,
-              start_date, due_date, status, completed_at
+              start_date, due_date, status, completed_at, urgent_pin
   `;
 
   if (!rows.length) return json({ error: "not found" }, 404);
