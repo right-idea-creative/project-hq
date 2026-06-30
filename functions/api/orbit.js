@@ -55,8 +55,8 @@ export async function onRequest(context) {
         (status IS NULL OR status NOT IN ('done', 'completed', 'cancelled', 'archived'))
         -- exclude past milestones
         AND NOT (type = 'milestone' AND due_date < CURRENT_DATE)
-        -- the monitor handles these four kinds
-        AND type IN ('task', 'trip', 'milestone', 'focus')
+        -- the monitor handles these kinds
+        AND type IN ('task', 'initiative', 'trip', 'milestone', 'focus')
       ORDER BY
         kind DESC,                                  -- finite first
         COALESCE(due_date, start_date) ASC NULLS LAST,
