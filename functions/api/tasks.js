@@ -1,9 +1,7 @@
-import { neon } from "@neondatabase/serverless";
-
+Here is the current task.js please rewrite to both read and write from the neon database. import { neon } from "@neondatabase/serverless";
 export async function onRequest(context) {
   try {
     const sql = neon(context.env.DATABASE_URL);
-
     const rows = await sql`
       SELECT
         id,
@@ -39,7 +37,6 @@ export async function onRequest(context) {
         AND NOT (type = 'milestone' AND due_date < CURRENT_DATE)
       ORDER BY COALESCE(start_date, due_date) ASC NULLS LAST
     `;
-
     return new Response(JSON.stringify(rows), {
       headers: { "Content-Type": "application/json" },
     });
