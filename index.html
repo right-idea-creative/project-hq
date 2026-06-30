@@ -3,36 +3,43 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>project-hq</title>
+<title>Life HQ</title>
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg-page: #f4f3ee;
-    --bg-surface: #eceadf;
+    --bg-page: #ffffff;
+    --bg-surface: #f5f5f5;
     --bg-card: #ffffff;
-    --text-1: #2c2c2a;
-    --text-2: #5f5e5a;
-    --text-3: #97958c;
-    --border: rgba(0,0,0,0.12);
-    --border-2: rgba(0,0,0,0.22);
+    --text-1: #111111;
+    --text-2: #555555;
+    --text-3: #9a9a9a;
+    --border: rgba(0,0,0,0.10);
+    --border-2: rgba(0,0,0,0.20);
     --radius: 12px;
     --radius-md: 8px;
-    --hot: #d85a30;
-    --cool: #378add;
-    --trip: #185fa5;
-    --milestone: #993c1d;
+    /* category / type colors retained for distinction */
+    --trip: #1f6feb;
+    --milestone: #d97706;
+    /* urgency strip ramp: light grey -> near-black as urgency climbs */
+    --urg-min: #d8d8d8;
+    --urg-max: #111111;
+    --font-display: "Space Grotesk", -apple-system, system-ui, sans-serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-family: var(--font-body);
     background: var(--bg-page);
     color: var(--text-1);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-  h1 { font-size: 20px; font-weight: 500; margin: 0 0 1.25rem; color: var(--text-1); }
+  h1 { font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 1.25rem; color: var(--text-1); }
 
   .tabs { display:flex; gap:2px; align-items:flex-end; padding-left:6px; position:relative; z-index:2; }
   .tab { display:flex; align-items:center; gap:6px; font-size:13px; padding:8px 16px; border:0.5px solid var(--border); border-bottom:none; border-radius:8px 8px 0 0; cursor:pointer; color:var(--text-2); background:var(--bg-surface); position:relative; top:0.5px; user-select:none; }
@@ -41,8 +48,6 @@
 
   .panel { background:var(--bg-card); border:0.5px solid var(--border); border-radius:0 var(--radius) var(--radius) var(--radius); padding:1rem; position:relative; z-index:1; min-height:200px; }
 
-  .addbar { background:var(--bg-surface); border:0.5px solid var(--border); border-radius:var(--radius-md); padding:12px; margin-bottom:16px; }
-  .addrow { display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; }
   .fld { display:flex; flex-direction:column; gap:4px; }
   .fld label { font-size:11px; color:var(--text-3); padding-left:2px; }
   input, select { height:36px; padding:0 10px; font-size:14px; border:0.5px solid var(--border-2); border-radius:var(--radius-md); background:var(--bg-card); color:var(--text-1); font-family:inherit; }
@@ -53,15 +58,20 @@
 
   .card { background:var(--bg-card); border:0.5px solid var(--border); border-radius:var(--radius); margin-bottom:8px; overflow:hidden; }
   .row { display:flex; align-items:stretch; cursor:pointer; }
-  .accent { width:4px; flex-shrink:0; }
+  .accent { width:6px; flex-shrink:0; }
+  .accent.pulse { animation:urgpulse 1.15s ease-in-out infinite; }
+  @keyframes urgpulse { 0%,100% { opacity:1; } 50% { opacity:0.28; } }
+  @media (prefers-reduced-motion: reduce) { .accent.pulse { animation:none; } }
   .rowbody { display:flex; align-items:center; gap:14px; padding:12px 14px; flex:1; min-width:0; }
   .check { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border-2); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; background:transparent; transition:all .12s; }
-  .check:hover { border-color:var(--text-2); }
+  .check:hover { border-color:var(--text-1); }
   .typeicon { width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:17px; }
   .title { font-size:15px; color:var(--text-1); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .pill { font-size:11px; padding:2px 9px; border-radius:999px; flex-shrink:0; white-space:nowrap; }
-  .urgwrap { width:80px; flex-shrink:0; height:6px; border-radius:999px; background:var(--border); overflow:hidden; }
-  .urgbar { height:100%; border-radius:999px; }
+  /* importance: 5 dots, filled left-to-right */
+  .imp { display:flex; gap:3px; flex-shrink:0; align-items:center; }
+  .imp .dot { width:6px; height:6px; border-radius:50%; background:var(--border); }
+  .imp .dot.on { background:var(--text-1); }
   .span { font-size:12px; color:var(--text-2); flex-shrink:0; white-space:nowrap; }
   .span .cd { color:var(--text-3); }
   .chev { flex-shrink:0; font-size:16px; color:var(--text-3); transition:transform .15s; }
@@ -80,6 +90,65 @@
   .state { text-align:center; padding:2.5rem 1rem; color:var(--text-3); font-size:14px; }
   .placeholder { text-align:center; padding:3rem 1rem; color:var(--text-3); }
   .placeholder i { font-size:32px; display:block; margin-bottom:10px; }
+
+  /* ---- toolbar: New button + filters ---- */
+  .toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .btn-new { height:36px; padding:0 16px; font-family:var(--font-body); font-size:14px; font-weight:500;
+    border:0.5px solid var(--text-1); border-radius:var(--radius-md); background:var(--text-1); color:#fff;
+    cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .btn-new:hover { background:#000; }
+  .btn-new:active { transform:scale(0.98); }
+  .filters { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-left:auto; }
+  .filtergroup { display:flex; gap:4px; }
+  .chip { height:28px; padding:0 11px; font-size:12px; border:0.5px solid var(--border-2); border-radius:999px;
+    background:transparent; color:var(--text-2); cursor:pointer; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+  .chip:hover { border-color:var(--text-2); color:var(--text-1); }
+  .chip.active { background:var(--text-1); color:#fff; border-color:var(--text-1); }
+  .chip .cdot { width:8px; height:8px; border-radius:50%; flex:none; }
+  .filtersep { width:0.5px; height:18px; background:var(--border-2); margin:0 2px; }
+
+  /* row edit affordance */
+  .editbtn { flex-shrink:0; width:24px; height:24px; border:none; background:transparent; color:var(--text-3);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; opacity:0; transition:opacity .12s; border-radius:6px; }
+  .card:hover .editbtn { opacity:1; }
+  .editbtn:hover { background:var(--bg-surface); color:var(--text-1); }
+
+  /* ---- modal ---- */
+  .modal-scrim { position:fixed; inset:0; background:rgba(0,0,0,0.32); z-index:50; display:none;
+    align-items:flex-start; justify-content:center; padding:8vh 1rem 2rem; }
+  .modal-scrim.open { display:flex; }
+  .modal { background:var(--bg-card); border:0.5px solid var(--border-2); border-radius:14px; width:100%; max-width:440px;
+    box-shadow:0 12px 40px rgba(0,0,0,0.18); overflow:hidden; }
+  .modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 18px 0; }
+  .modal-head h2 { font-family:var(--font-display); font-size:17px; font-weight:600; margin:0; }
+  .modal-x { width:30px; height:30px; border:none; background:transparent; color:var(--text-3); cursor:pointer;
+    border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .modal-x:hover { background:var(--bg-surface); color:var(--text-1); }
+  .modal-body { padding:14px 18px 18px; display:flex; flex-direction:column; gap:12px; }
+  .modal-body .fld { display:flex; flex-direction:column; gap:5px; }
+  .modal-body .fld label { font-size:11px; color:var(--text-3); padding-left:2px; }
+  .modal-body input, .modal-body select, .modal-body textarea { width:100%; }
+  .modal-body textarea { min-height:60px; padding:8px 10px; font-size:14px; font-family:inherit;
+    border:0.5px solid var(--border-2); border-radius:var(--radius-md); resize:vertical; color:var(--text-1); background:var(--bg-card); }
+  .modal-body textarea:focus { outline:none; box-shadow:0 0 0 2px rgba(0,0,0,0.18); }
+  .modal-row { display:flex; gap:10px; }
+  .modal-row .fld { flex:1; }
+  /* segmented type picker */
+  .typeseg { display:flex; gap:0; border:0.5px solid var(--border-2); border-radius:var(--radius-md); overflow:hidden; }
+  .typeseg button { flex:1; height:38px; border:none; border-right:0.5px solid var(--border-2); background:var(--bg-card);
+    font-family:inherit; font-size:12px; color:var(--text-2); cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+  .typeseg button:last-child { border-right:none; }
+  .typeseg button i { font-size:15px; }
+  .typeseg button.active { background:var(--text-1); color:#fff; }
+  .modal-foot { display:flex; justify-content:flex-end; gap:8px; padding-top:4px; }
+  .modal-foot button { height:38px; padding:0 18px; font-family:inherit; font-size:14px; font-weight:500;
+    border-radius:var(--radius-md); cursor:pointer; border:0.5px solid var(--border-2); }
+  .btn-cancel { background:var(--bg-card); color:var(--text-2); }
+  .btn-cancel:hover { background:var(--bg-surface); }
+  .btn-save { background:var(--text-1); color:#fff; border-color:var(--text-1); }
+  .btn-save:hover { background:#000; }
+  .btn-save:disabled { opacity:0.5; cursor:default; }
+  @media (max-width:480px){ .modal-row { flex-direction:column; } }
   /* ---- Clusters / Periphery Monitor ---- */
   #orbit-wrap { position:relative; width:100%; height:72vh; min-height:460px;
     background:var(--bg-card); border:0.5px solid var(--border); border-radius:var(--radius); overflow:hidden; }
@@ -109,7 +178,7 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>project-hq</h1>
+  <h1>Life HQ</h1>
 
   <div class="tabs">
     <div class="tab active" data-tab="list"><i class="ti ti-list-check"></i>List</div>
@@ -120,50 +189,18 @@
 
   <div class="panel">
     <div id="panel-list">
-      <div class="addbar">
-        <div class="addrow">
-          <div class="fld" style="flex:1; min-width:160px;">
-            <label for="new-title">Title</label>
-            <input id="new-title" type="text" placeholder="Add an item…" />
+      <div class="toolbar">
+        <button class="btn-new" id="open-add"><i class="ti ti-plus"></i>New</button>
+        <div class="filters">
+          <div class="filtergroup" id="type-filters">
+            <button class="chip active" data-tf="all">All</button>
+            <button class="chip" data-tf="task"><i class="ti ti-circle"></i>Tasks</button>
+            <button class="chip" data-tf="initiative"><i class="ti ti-target"></i>Initiatives</button>
+            <button class="chip" data-tf="trip"><i class="ti ti-plane-tilt"></i>Trips</button>
+            <button class="chip" data-tf="milestone"><i class="ti ti-flag"></i>Milestones</button>
           </div>
-          <div class="fld" style="width:120px;">
-            <label for="new-type">Type</label>
-            <select id="new-type">
-              <option value="task">Task</option>
-              <option value="trip">Trip</option>
-              <option value="milestone">Milestone</option>
-            </select>
-          </div>
-          <div class="fld" style="width:120px;">
-            <label for="new-cat">Category</label>
-            <select id="new-cat">
-              <option value="">None</option>
-              <option value="finance">Finance</option>
-              <option value="dogs">Dogs</option>
-              <option value="projects">Projects</option>
-              <option value="house">House</option>
-              <option value="family">Friends &amp; family</option>
-            </select>
-          </div>
-          <div class="fld" id="fld-imp" style="width:70px;">
-            <label for="new-imp">Imp</label>
-            <select id="new-imp">
-              <option value="3">3</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-          </div>
-          <div class="fld" id="fld-due" style="width:150px;">
-            <label for="new-due" id="lbl-due">Due</label>
-            <input id="new-due" type="date" />
-          </div>
-          <div class="fld" id="fld-end" style="width:150px; display:none;">
-            <label for="new-end">End</label>
-            <input id="new-end" type="date" />
-          </div>
-          <button id="add-btn"><i class="ti ti-plus" style="margin-right:4px;"></i>Add</button>
+          <div class="filtersep"></div>
+          <div class="filtergroup" id="cat-filters"></div>
         </div>
       </div>
 
@@ -173,6 +210,71 @@
         <span><i class="ti ti-chevron-right" id="done-chev" style="vertical-align:-2px; margin-right:6px;"></i>Done <span class="cnt" id="done-count"></span></span>
       </button>
       <div id="done-list" style="display:none; margin-top:6px;"></div>
+    </div>
+
+    <div class="modal-scrim" id="modal-scrim">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-head">
+          <h2 id="modal-title">New item</h2>
+          <button class="modal-x" id="modal-close" aria-label="Close"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="fld">
+            <label for="m-title">Title</label>
+            <input id="m-title" type="text" placeholder="What is it?" />
+          </div>
+          <div class="fld">
+            <label>Type</label>
+            <div class="typeseg" id="m-typeseg">
+              <button data-type="task" class="active"><i class="ti ti-circle"></i>Task</button>
+              <button data-type="initiative"><i class="ti ti-target"></i>Initiative</button>
+              <button data-type="trip"><i class="ti ti-plane-tilt"></i>Trip</button>
+              <button data-type="milestone"><i class="ti ti-flag"></i>Milestone</button>
+            </div>
+          </div>
+          <div class="modal-row">
+            <div class="fld">
+              <label for="m-cat">Category</label>
+              <select id="m-cat">
+                <option value="">None</option>
+                <option value="finance">Finance</option>
+                <option value="dogs">Dogs</option>
+                <option value="projects">Projects</option>
+                <option value="house">House</option>
+                <option value="family">Friends &amp; family</option>
+              </select>
+            </div>
+            <div class="fld" id="m-fld-imp">
+              <label for="m-imp">Importance</label>
+              <select id="m-imp">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-row">
+            <div class="fld" id="m-fld-due">
+              <label for="m-due" id="m-lbl-due">Due</label>
+              <input id="m-due" type="date" />
+            </div>
+            <div class="fld" id="m-fld-end" style="display:none;">
+              <label for="m-end">End</label>
+              <input id="m-end" type="date" />
+            </div>
+          </div>
+          <div class="fld">
+            <label for="m-body">Notes</label>
+            <textarea id="m-body" placeholder="Optional details…"></textarea>
+          </div>
+          <div class="modal-foot">
+            <button class="btn-cancel" id="modal-cancel">Cancel</button>
+            <button class="btn-save" id="modal-save">Add item</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="panel-notes" style="display:none;">
@@ -223,9 +325,12 @@ function urg(it) { return it.urgency == null ? null : parseFloat(it.urgency); }
 function maxUrg() { let m = 0; items.forEach(it => { const u = urg(it); if (u != null && u > m) m = u; }); return m || 1; }
 
 function ring(imp) {
-  if (imp == null) return '<div style="width:22px;height:22px;flex-shrink:0;"></div>';
-  const r = 9, c = 2 * Math.PI * r, off = c * (1 - imp/5);
-  return '<svg width="22" height="22" viewBox="0 0 22 22" style="flex-shrink:0;" aria-label="importance '+imp+' of 5"><circle cx="11" cy="11" r="'+r+'" fill="none" stroke="var(--border)" stroke-width="2.5"/><circle cx="11" cy="11" r="'+r+'" fill="none" stroke="var(--text-2)" stroke-width="2.5" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 11 11)"/></svg>';
+  // importance as 5 dots, filled left-to-right; empty slot keeps width stable
+  if (imp == null) return '<div style="width:48px;flex-shrink:0;"></div>';
+  const n = Math.max(0, Math.min(5, Math.round(imp)));
+  let dots = '';
+  for (let i = 1; i <= 5; i++) dots += '<span class="dot'+(i <= n ? ' on' : '')+'"></span>';
+  return '<div class="imp" aria-label="importance '+n+' of 5">'+dots+'</div>';
 }
 function pill(cat) {
   if (!cat || !CATS[cat]) return '<span style="width:0;"></span>';
@@ -234,6 +339,7 @@ function pill(cat) {
 }
 function leftControl(it) {
   if (it.type === 'task') return '<div class="check" data-id="'+it.id+'"></div>';
+  if (it.type === 'initiative') return '<div class="check" data-id="'+it.id+'"></div>';
   if (it.type === 'trip') return '<div class="typeicon" style="color:var(--trip);"><i class="ti ti-plane-tilt"></i></div>';
   if (it.type === 'milestone') return '<div class="typeicon" style="color:var(--milestone);"><i class="ti ti-flag"></i></div>';
   return '<div style="width:20px;flex-shrink:0;"></div>';
@@ -250,20 +356,25 @@ function rightControl(it, mx) {
     const cd = dl == null ? '' : (dl > 0 ? 'in '+dl+'d' : (dl === 0 ? 'today' : 'passed'));
     return '<span class="span"><span class="cd">'+cd+'</span> · '+fmt(d)+'</span>';
   }
-  const u = urg(it), hot = u != null && u >= mx*0.55;
-  const w = u == null ? 0 : Math.round((u/mx)*100);
-  return '<div class="urgwrap"><div class="urgbar" style="width:'+w+'%;background:'+(hot?'var(--hot)':'var(--cool)')+';"></div></div>';
+  // tasks: urgency now lives entirely in the left strip
+  return '';
+}
+// blend light grey -> near-black by urgency fraction; returns {color, pulse}
+function urgencyStrip(it, mx) {
+  const u = urg(it);
+  if (u == null) return { color: 'var(--border)', pulse: false };
+  const f = Math.max(0, Math.min(1, u / mx));
+  // lerp #d8d8d8 (216) -> #111111 (17)
+  const v = Math.round(216 + (17 - 216) * f);
+  const hex = v.toString(16).padStart(2, '0');
+  return { color: '#'+hex+hex+hex, pulse: f >= 0.999 };
 }
 function accentColor(it, mx) {
-  if (it.type === 'trip') return 'var(--cool)';
+  if (it.type === 'trip') return 'var(--trip)';
   if (it.type === 'milestone') return 'var(--milestone)';
-  const u = urg(it);
-  if (u == null) return 'var(--border)';
-  return u >= mx*0.55 ? 'var(--hot)' : 'var(--cool)';
+  return urgencyStrip(it, mx).color;
 }
 function cardBg(it) {
-  if (it.type === 'trip') return 'rgba(55,138,221,0.06)';
-  if (it.type === 'milestone') return 'rgba(216,90,48,0.06)';
   return 'var(--bg-card)';
 }
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -271,28 +382,32 @@ function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function render() {
   const mx = maxUrg();
   const ol = document.getElementById('open-list');
-  if (!items.length) {
-    ol.innerHTML = '<div class="state">No open items.</div>';
+  const shown = items.filter(passesFilter);
+  if (!shown.length) {
+    ol.innerHTML = '<div class="state">'+(items.length ? 'Nothing matches these filters.' : 'No open items.')+'</div>';
   } else {
     ol.innerHTML = '';
-    items.forEach(it => {
+    shown.forEach(it => {
       const card = document.createElement('div');
       card.className = 'card';
       card.style.background = cardBg(it);
-      const impSlot = it.type === 'task' ? ring(it.importance) : '<div style="width:22px;flex-shrink:0;"></div>';
+      const useTaskUI = (it.type === 'task' || it.type === 'initiative');
+      const impSlot = useTaskUI ? ring(it.importance) : '<div style="width:48px;flex-shrink:0;"></div>';
       const isOpen = openId === it.id;
+      const strip = useTaskUI ? urgencyStrip(it, mx) : { color: accentColor(it,mx), pulse:false };
       const bodyHtml = (it.body && it.body.trim())
         ? '<div class="bodytext">'+esc(it.body)+'</div>'
         : '<div class="bodytext empty">No description.</div>';
       card.innerHTML =
         '<div class="row" data-row="'+it.id+'">'+
-          '<div class="accent" style="background:'+accentColor(it,mx)+';"></div>'+
+          '<div class="accent'+(strip.pulse?' pulse':'')+'" style="background:'+strip.color+';"></div>'+
           '<div class="rowbody">'+
             leftControl(it)+
             '<span class="title">'+esc(it.title)+'</span>'+
             pill(it.category)+
             impSlot+
             rightControl(it,mx)+
+            '<button class="editbtn" data-edit="'+it.id+'" aria-label="Edit"><i class="ti ti-pencil"></i></button>'+
             '<i class="ti ti-chevron-down chev" style="transform:rotate('+(isOpen?'180':'0')+'deg);"></i>'+
           '</div>'+
         '</div>'+
@@ -302,6 +417,7 @@ function render() {
     ol.querySelectorAll('.row').forEach(row => {
       row.onclick = (e) => {
         if (e.target.closest('.check')) return;
+        if (e.target.closest('.editbtn')) return;
         const id = row.dataset.row;
         openId = openId === id ? null : id;
         render();
@@ -309,6 +425,9 @@ function render() {
     });
     ol.querySelectorAll('.check').forEach(el => {
       el.onclick = (e) => { e.stopPropagation(); markDone(el.dataset.id); };
+    });
+    ol.querySelectorAll('.editbtn').forEach(el => {
+      el.onclick = (e) => { e.stopPropagation(); openEdit(el.dataset.edit); };
     });
   }
   renderDone();
@@ -333,8 +452,7 @@ function renderDone() {
   });
 }
 
-// optimistic: move the card now, fire the write, reload on completion.
-// markDone currently updates UI only — the /api/done function is the next file.
+// optimistic: move the card now, fire the write, reconcile (or roll back) after.
 function markDone(id) {
   const i = items.findIndex(it => it.id === id);
   if (i < 0) return;
@@ -344,9 +462,20 @@ function markDone(id) {
   doneItems.unshift(it);
   if (openId === id) openId = null;
   render();
-  // TODO next push:
-  // fetch('/api/done', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id }) })
-  //   .then(load);
+  fetch('/api/tasks', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  })
+    .then(async res => { if (!res.ok) throw new Error((await res.json()).error || res.status); })
+    .then(() => load())   // reconcile with server truth
+    .catch(err => {
+      // roll back the optimistic move
+      const j = doneItems.findIndex(d => d.id === id);
+      if (j >= 0) { const back = doneItems.splice(j, 1)[0]; back.status = 'open'; back.completed_at = null; items.unshift(back); }
+      render();
+      alert('Could not complete: ' + (err.message || err));
+    });
 }
 
 // ===========================================================================
@@ -534,7 +663,7 @@ const Orbit = (() => {
       if(didDrag)return; const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
       const fin=DATA.filter(d=>d.kind==='finite');
       for(let i=fin.length-1;i>=0;i--){ const it=fin[i],n=N[it.id]; if(!n||n._sx==null)continue;
-        if(Math.hypot(mx-n._sx,my-n._sy)<=n.rad*cam.z+3){ /* click finite node: hook to /api/done later */ return; } }
+        if(Math.hypot(mx-n._sx,my-n._sy)<=n.rad*cam.z+3){ /* click finite node: hook to PATCH /api/tasks later */ return; } }
       // focus arc click: tend (UI hint only until write path exists)
     });
     cv.addEventListener('wheel',e=>{ e.preventDefault(); const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top; const [wx,wy]=s2w(mx,my); const f=e.deltaY<0?1.1:1/1.1; cam.z=Math.max(0.25,Math.min(3,cam.z*f)); const [nx,ny]=s2w(mx,my); cam.x+=wx-nx; cam.y+=wy-ny; }, {passive:false});
@@ -592,30 +721,153 @@ async function load() {
   }
 }
 
-// add form — UI only for now; wires to /api/add next push
-const newType = document.getElementById('new-type');
-const fldImp = document.getElementById('fld-imp');
-const fldEnd = document.getElementById('fld-end');
-const lblDue = document.getElementById('lbl-due');
-function syncForm() {
-  const t = newType.value;
-  fldImp.style.display = t === 'task' ? 'flex' : 'none';
-  fldEnd.style.display = t === 'trip' ? 'flex' : 'none';
-  lblDue.textContent = t === 'trip' ? 'Start' : (t === 'milestone' ? 'Date' : 'Due');
-}
-newType.onchange = syncForm;
-syncForm();
-document.getElementById('new-due').value = isoToday(7);
+// ===========================================================================
+// Filters — type + category, applied client-side to loaded items.
+// ===========================================================================
+let typeFilter = 'all';
+const catFilter = new Set();  // empty = all categories
 
-document.getElementById('add-btn').onclick = () => {
-  const title = document.getElementById('new-title').value.trim();
-  if (!title) return;
-  alert('Add form is wired in the next push (needs the /api/add function).');
-  // TODO next push: build the payload by type and POST to /api/add, then load()
-};
-document.getElementById('new-title').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('add-btn').click();
+function passesFilter(it) {
+  if (typeFilter !== 'all' && it.type !== typeFilter) return false;
+  if (catFilter.size && !catFilter.has(it.category)) return false;
+  return true;
+}
+
+// build category chips from CATS
+(function buildCatFilters(){
+  const wrap = document.getElementById('cat-filters');
+  Object.keys(CATS).forEach(key => {
+    const c = CATS[key];
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.dataset.cf = key;
+    b.innerHTML = '<span class="cdot" style="background:'+c.text+';"></span>'+(CATLABEL[key]||key);
+    b.onclick = () => {
+      if (catFilter.has(key)) catFilter.delete(key); else catFilter.add(key);
+      b.classList.toggle('active');
+      render();
+    };
+    wrap.appendChild(b);
+  });
+})();
+
+document.querySelectorAll('#type-filters .chip').forEach(chip => {
+  chip.onclick = () => {
+    typeFilter = chip.dataset.tf;
+    document.querySelectorAll('#type-filters .chip').forEach(c => c.classList.toggle('active', c === chip));
+    render();
+  };
 });
+
+// ===========================================================================
+// Modal — shared by Add (no id) and Edit (existing id).
+// ===========================================================================
+const modal = {
+  scrim:  document.getElementById('modal-scrim'),
+  title:  document.getElementById('modal-title'),
+  mTitle: document.getElementById('m-title'),
+  seg:    document.getElementById('m-typeseg'),
+  cat:    document.getElementById('m-cat'),
+  imp:    document.getElementById('m-imp'),
+  fldImp: document.getElementById('m-fld-imp'),
+  fldDue: document.getElementById('m-fld-due'),
+  fldEnd: document.getElementById('m-fld-end'),
+  lblDue: document.getElementById('m-lbl-due'),
+  due:    document.getElementById('m-due'),
+  end:    document.getElementById('m-end'),
+  body:   document.getElementById('m-body'),
+  save:   document.getElementById('modal-save'),
+};
+let editingId = null;   // null = adding
+let modalType = 'task';
+
+function setModalType(t) {
+  modalType = t;
+  modal.seg.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.type === t));
+  // importance only for task/initiative; end date only for trip
+  modal.fldImp.style.display = (t === 'task' || t === 'initiative') ? 'flex' : 'none';
+  modal.fldEnd.style.display = (t === 'trip') ? 'flex' : 'none';
+  modal.lblDue.textContent = t === 'trip' ? 'Start' : (t === 'milestone' ? 'Date' : 'Due');
+}
+modal.seg.querySelectorAll('button').forEach(b => {
+  b.onclick = () => setModalType(b.dataset.type);
+});
+
+function openModal() { modal.scrim.classList.add('open'); setTimeout(() => modal.mTitle.focus(), 30); }
+function closeModal() { modal.scrim.classList.remove('open'); editingId = null; }
+
+function openAdd() {
+  editingId = null;
+  modal.title.textContent = 'New item';
+  modal.save.textContent = 'Add item';
+  modal.mTitle.value = '';
+  modal.cat.value = '';
+  modal.imp.value = '3';
+  modal.due.value = isoToday(7);
+  modal.end.value = '';
+  modal.body.value = '';
+  setModalType('task');
+  openModal();
+}
+
+function openEdit(id) {
+  const it = items.find(x => x.id === id) || doneItems.find(x => x.id === id);
+  if (!it) return;
+  editingId = id;
+  modal.title.textContent = 'Edit item';
+  modal.save.textContent = 'Save changes';
+  modal.mTitle.value = it.title || '';
+  modal.cat.value = it.category || '';
+  modal.imp.value = it.importance != null ? String(it.importance) : '3';
+  modal.body.value = it.body || '';
+  if (it.type === 'trip') {
+    modal.due.value = (it.start_date || '').slice(0,10);
+    modal.end.value = (it.due_date || '').slice(0,10);
+  } else {
+    modal.due.value = (it.due_date || '').slice(0,10);
+    modal.end.value = '';
+  }
+  setModalType(it.type);
+  openModal();
+}
+
+async function saveModal() {
+  const title = modal.mTitle.value.trim();
+  if (!title) { modal.mTitle.focus(); return; }
+  const payload = {
+    title,
+    type: modalType,
+    category: modal.cat.value || null,
+    body: modal.body.value.trim() || null,
+    due: modal.due.value || null,
+    end: modalType === 'trip' ? (modal.end.value || null) : null,
+    importance: (modalType === 'task' || modalType === 'initiative') ? modal.imp.value : null,
+  };
+  if (editingId != null) payload.id = editingId;
+  modal.save.disabled = true;
+  try {
+    const res = await fetch('/api/tasks', {
+      method: editingId != null ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error((await res.json()).error || res.status);
+    closeModal();
+    await load();
+  } catch (err) {
+    alert('Could not save: ' + (err.message || err));
+  } finally {
+    modal.save.disabled = false;
+  }
+}
+
+document.getElementById('open-add').onclick = openAdd;
+document.getElementById('modal-close').onclick = closeModal;
+document.getElementById('modal-cancel').onclick = closeModal;
+modal.save.onclick = saveModal;
+modal.scrim.onclick = (e) => { if (e.target === modal.scrim) closeModal(); };
+modal.mTitle.addEventListener('keydown', e => { if (e.key === 'Enter') saveModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.scrim.classList.contains('open')) closeModal(); });
 
 document.getElementById('done-toggle').onclick = () => {
   const list = document.getElementById('done-list');
