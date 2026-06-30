@@ -7,26 +7,28 @@
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css" rel="stylesheet" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg-page: #ffffff;
-    --bg-surface: #f5f5f5;
-    --bg-card: #ffffff;
-    --text-1: #111111;
-    --text-2: #555555;
-    --text-3: #9a9a9a;
-    --border: rgba(0,0,0,0.10);
-    --border-2: rgba(0,0,0,0.20);
+    --bg-page: #fbfaf5;
+    --bg-surface: #f3f1e8;
+    --bg-card: #fbfaf5;
+    --text-1: #2b2a28;
+    --text-2: #6b675d;
+    --text-3: #9a968a;
+    --border: #e0ddd2;
+    --border-2: #cdc9bb;
+    --dot: #d6d2c4;
     --radius: 12px;
     --radius-md: 8px;
-    /* category / type colors retained for distinction */
+    /* type / category colors retained for distinction */
     --trip: #1f6feb;
     --milestone: #d97706;
-    /* urgency strip ramp: light grey -> near-black as urgency climbs */
-    --urg-min: #d8d8d8;
-    --urg-max: #111111;
-    --font-display: "Space Grotesk", -apple-system, system-ui, sans-serif;
+    /* highlighter swipe colors */
+    --hl-urgent: #ffe14d;
+    --hl-trip: #9fdcff;
+    --hl-mile: #ffc2a8;
+    --font-display: "Caveat", "Bradley Hand", cursive;
     --font-body: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
@@ -37,13 +39,17 @@
     color: var(--text-1);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle, var(--dot) 0.8px, transparent 0.8px);
+    background-size: 20px 20px;
   }
   .wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-  h1 { font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 1.25rem; color: var(--text-1); }
+  h1 { font-family: var(--font-display); font-size: 34px; font-weight: 700; letter-spacing: 0; margin: 0 0 0.25rem; color: var(--text-1); line-height: 1; }
 
   .tabs { display:flex; gap:2px; align-items:flex-end; padding-left:6px; position:relative; z-index:2; }
   .tab { display:flex; align-items:center; gap:6px; font-size:13px; padding:8px 16px; border:0.5px solid var(--border); border-bottom:none; border-radius:8px 8px 0 0; cursor:pointer; color:var(--text-2); background:var(--bg-surface); position:relative; top:0.5px; user-select:none; }
   .tab.active { background:var(--bg-card); color:var(--text-1); margin-bottom:-0.5px; padding-bottom:9px; }
+  .tab:not(.active):hover { color:var(--text-1); }
+  .panel { background:var(--bg-card); border:0.5px solid var(--border); border-radius:0 var(--radius) var(--radius) var(--radius); padding:1.25rem 1.25rem 1.5rem; position:relative; z-index:1; min-height:200px; }
   .tab:not(.active):hover { color:var(--text-1); }
 
   .panel { background:var(--bg-card); border:0.5px solid var(--border); border-radius:0 var(--radius) var(--radius) var(--radius); padding:1rem; position:relative; z-index:1; min-height:200px; }
@@ -56,36 +62,43 @@
   button:hover { background:var(--bg-surface); }
   button:active { transform:scale(0.98); }
 
-  .card { background:var(--bg-card); border:0.5px solid var(--border); border-radius:var(--radius); margin-bottom:8px; overflow:hidden; }
-  .row { display:flex; align-items:stretch; cursor:pointer; }
-  .accent { width:6px; flex-shrink:0; }
-  .accent.pulse { animation:urgpulse 1.15s ease-in-out infinite; }
-  @keyframes urgpulse { 0%,100% { opacity:1; } 50% { opacity:0.28; } }
-  @media (prefers-reduced-motion: reduce) { .accent.pulse { animation:none; } }
-  .rowbody { display:flex; align-items:center; gap:14px; padding:12px 14px; flex:1; min-width:0; }
-  .check { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border-2); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; background:transparent; transition:all .12s; }
+  /* borderless rows on the dot grid — no cards, no rules */
+  .card { background:transparent; margin:0; }
+  .row { display:flex; align-items:center; gap:12px; padding:8px 0 8px 2px; cursor:pointer; }
+  .rowbody { display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
+  .check { width:19px; height:19px; border-radius:50%; border:1.7px solid var(--text-3); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; background:transparent; transition:all .12s; }
   .check:hover { border-color:var(--text-1); }
   .typeicon { width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:17px; }
-  .title { font-size:15px; color:var(--text-1); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .pill { font-size:11px; padding:2px 9px; border-radius:999px; flex-shrink:0; white-space:nowrap; }
+  .title { font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--text-1); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.1; }
+  /* highlighter swipe behind the title text */
+  .title .mark { padding:1px 5px; border-radius:2px; background-repeat:no-repeat; background-size:100% 74%; background-position:0 64%;
+    box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+  .mark.hl-urgent { background-image:linear-gradient(transparent 0, var(--hl-urgent) 0); }
+  .mark.hl-trip   { background-image:linear-gradient(transparent 0, var(--hl-trip) 0); }
+  .mark.hl-mile   { background-image:linear-gradient(transparent 0, var(--hl-mile) 0); }
+  .pill { font-family:var(--font-display); font-size:16px; font-weight:600; padding:0 10px; border-radius:999px; flex-shrink:0; white-space:nowrap; }
   /* importance: 5 dots, filled left-to-right */
   .imp { display:flex; gap:3px; flex-shrink:0; align-items:center; }
-  .imp .dot { width:6px; height:6px; border-radius:50%; background:var(--border); }
+  .imp .dot { width:6px; height:6px; border-radius:50%; background:var(--dot); }
   .imp .dot.on { background:var(--text-1); }
-  .span { font-size:12px; color:var(--text-2); flex-shrink:0; white-space:nowrap; }
+  .span { font-family:var(--font-display); font-size:18px; font-weight:600; color:var(--text-2); flex-shrink:0; white-space:nowrap; }
   .span .cd { color:var(--text-3); }
+  .editbtn { flex-shrink:0; width:24px; height:24px; border:none; background:transparent; color:var(--text-3);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; opacity:0; transition:opacity .12s; border-radius:6px; }
+  .row:hover .editbtn { opacity:1; }
+  .editbtn:hover { background:var(--bg-surface); color:var(--text-1); }
   .chev { flex-shrink:0; font-size:16px; color:var(--text-3); transition:transform .15s; }
-  .expand { padding:0 16px 0 38px; max-height:0; overflow:hidden; transition:max-height .2s ease, padding .2s ease; }
-  .expand.open { max-height:400px; padding:0 16px 14px 38px; }
-  .bodytext { font-size:14px; line-height:1.6; color:var(--text-2); border-top:0.5px solid var(--border); padding-top:12px; white-space:pre-wrap; }
+  .expand { padding:0 0 0 32px; max-height:0; overflow:hidden; transition:max-height .2s ease, padding .2s ease; }
+  .expand.open { max-height:400px; padding:0 0 10px 32px; }
+  .bodytext { font-size:14px; line-height:1.6; color:var(--text-2); white-space:pre-wrap; }
   .bodytext.empty { color:var(--text-3); font-style:italic; }
 
-  .donetoggle { width:100%; justify-content:space-between; margin-top:12px; }
+  .donetoggle { width:100%; justify-content:space-between; margin-top:16px; background:transparent; border:none; }
   .donetoggle .cnt { color:var(--text-3); }
-  .donerow { display:flex; align-items:center; gap:12px; padding:8px 14px; font-size:13px; color:var(--text-3); }
+  .donerow { display:flex; align-items:center; gap:12px; padding:6px 0; font-family:var(--font-display); font-size:18px; color:var(--text-3); }
   .donerow .check { border-color:var(--text-3); background:var(--text-3); }
-  .donerow .title { font-size:13px; text-decoration:line-through; color:var(--text-3); }
-  .donerow .time { margin-left:auto; font-size:11px; color:var(--text-3); }
+  .donerow .title { font-family:var(--font-display); font-size:18px; text-decoration:line-through; color:var(--text-3); }
+  .donerow .time { margin-left:auto; font-family:var(--font-body); font-size:11px; color:var(--text-3); }
 
   .state { text-align:center; padding:2.5rem 1rem; color:var(--text-3); font-size:14px; }
   .placeholder { text-align:center; padding:3rem 1rem; color:var(--text-3); }
@@ -120,7 +133,7 @@
   .modal { background:var(--bg-card); border:0.5px solid var(--border-2); border-radius:14px; width:100%; max-width:440px;
     box-shadow:0 12px 40px rgba(0,0,0,0.18); overflow:hidden; }
   .modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 18px 0; }
-  .modal-head h2 { font-family:var(--font-display); font-size:17px; font-weight:600; margin:0; }
+  .modal-head h2 { font-family:var(--font-display); font-size:24px; font-weight:700; margin:0; }
   .modal-x { width:30px; height:30px; border:none; background:transparent; color:var(--text-3); cursor:pointer;
     border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:18px; }
   .modal-x:hover { background:var(--bg-surface); color:var(--text-1); }
@@ -140,6 +153,9 @@
   .typeseg button:last-child { border-right:none; }
   .typeseg button i { font-size:15px; }
   .typeseg button.active { background:var(--text-1); color:#fff; }
+  .urgent-toggle { display:flex; align-items:center; gap:8px; cursor:pointer; padding:2px 0; font-size:13px; color:var(--text-1); }
+  .urgent-toggle input { width:16px; height:16px; flex:none; accent-color:var(--text-1); cursor:pointer; }
+  .urgent-toggle .urgent-hint { font-size:11px; color:var(--text-3); margin-left:auto; }
   .modal-foot { display:flex; justify-content:flex-end; gap:8px; padding-top:4px; }
   .modal-foot button { height:38px; padding:0 18px; font-family:inherit; font-size:14px; font-weight:500;
     border-radius:var(--radius-md); cursor:pointer; border:0.5px solid var(--border-2); }
@@ -179,6 +195,7 @@
 <body>
 <div class="wrap">
   <h1>Life HQ</h1>
+  <div id="today-sub" style="font-size:11px; color:var(--text-3); letter-spacing:.04em; text-transform:uppercase; margin-bottom:1.1rem;"></div>
 
   <div class="tabs">
     <div class="tab active" data-tab="list"><i class="ti ti-list-check"></i>List</div>
@@ -212,71 +229,6 @@
       <div id="done-list" style="display:none; margin-top:6px;"></div>
     </div>
 
-    <div class="modal-scrim" id="modal-scrim">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-        <div class="modal-head">
-          <h2 id="modal-title">New item</h2>
-          <button class="modal-x" id="modal-close" aria-label="Close"><i class="ti ti-x"></i></button>
-        </div>
-        <div class="modal-body">
-          <div class="fld">
-            <label for="m-title">Title</label>
-            <input id="m-title" type="text" placeholder="What is it?" />
-          </div>
-          <div class="fld">
-            <label>Type</label>
-            <div class="typeseg" id="m-typeseg">
-              <button data-type="task" class="active"><i class="ti ti-circle"></i>Task</button>
-              <button data-type="initiative"><i class="ti ti-target"></i>Initiative</button>
-              <button data-type="trip"><i class="ti ti-plane-tilt"></i>Trip</button>
-              <button data-type="milestone"><i class="ti ti-flag"></i>Milestone</button>
-            </div>
-          </div>
-          <div class="modal-row">
-            <div class="fld">
-              <label for="m-cat">Category</label>
-              <select id="m-cat">
-                <option value="">None</option>
-                <option value="finance">Finance</option>
-                <option value="dogs">Dogs</option>
-                <option value="projects">Projects</option>
-                <option value="house">House</option>
-                <option value="family">Friends &amp; family</option>
-              </select>
-            </div>
-            <div class="fld" id="m-fld-imp">
-              <label for="m-imp">Importance</label>
-              <select id="m-imp">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3" selected>3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-row">
-            <div class="fld" id="m-fld-due">
-              <label for="m-due" id="m-lbl-due">Due</label>
-              <input id="m-due" type="date" />
-            </div>
-            <div class="fld" id="m-fld-end" style="display:none;">
-              <label for="m-end">End</label>
-              <input id="m-end" type="date" />
-            </div>
-          </div>
-          <div class="fld">
-            <label for="m-body">Notes</label>
-            <textarea id="m-body" placeholder="Optional details…"></textarea>
-          </div>
-          <div class="modal-foot">
-            <button class="btn-cancel" id="modal-cancel">Cancel</button>
-            <button class="btn-save" id="modal-save">Add item</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div id="panel-notes" style="display:none;">
       <div class="placeholder"><i class="ti ti-note"></i>Notes — text items from the same table. Coming later.</div>
     </div>
@@ -299,6 +251,79 @@
   </div>
 </div>
 
+<div class="modal-scrim" id="modal-scrim">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h2 id="modal-title">New item</h2>
+      <button class="modal-x" id="modal-close" aria-label="Close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="fld">
+        <label for="m-title">Title</label>
+        <input id="m-title" type="text" placeholder="What is it?" />
+      </div>
+      <div class="fld">
+        <label>Type</label>
+        <div class="typeseg" id="m-typeseg">
+          <button data-type="task" class="active"><i class="ti ti-circle"></i>Task</button>
+          <button data-type="initiative"><i class="ti ti-target"></i>Initiative</button>
+          <button data-type="trip"><i class="ti ti-plane-tilt"></i>Trip</button>
+          <button data-type="milestone"><i class="ti ti-flag"></i>Milestone</button>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="fld">
+          <label for="m-cat">Category</label>
+          <select id="m-cat">
+            <option value="">None</option>
+            <option value="finance">Finance</option>
+            <option value="dogs">Dogs</option>
+            <option value="projects">Projects</option>
+            <option value="house">House</option>
+            <option value="family">Friends &amp; family</option>
+            <option value="personal">Personal</option>
+            <option value="work">Work</option>
+            <option value="health">Health</option>
+          </select>
+        </div>
+        <div class="fld" id="m-fld-imp">
+          <label for="m-imp">Importance</label>
+          <select id="m-imp">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="fld" id="m-fld-due">
+          <label for="m-due" id="m-lbl-due">Due</label>
+          <input id="m-due" type="date" />
+        </div>
+        <div class="fld" id="m-fld-end" style="display:none;">
+          <label for="m-end">End</label>
+          <input id="m-end" type="date" />
+        </div>
+      </div>
+      <label class="urgent-toggle" id="m-fld-urgent">
+        <input type="checkbox" id="m-urgent" />
+        <span><i class="ti ti-highlight" aria-hidden="true"></i> Pin as urgent</span>
+        <span class="urgent-hint">highlights it now, regardless of date</span>
+      </label>
+      <div class="fld">
+        <label for="m-body">Notes</label>
+        <textarea id="m-body" placeholder="Optional details…"></textarea>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" id="modal-cancel">Cancel</button>
+        <button class="btn-save" id="modal-save">Add item</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const CATS = {
   finance:  { fill:'#E1F5EE', text:'#0F6E56' },
@@ -306,8 +331,11 @@ const CATS = {
   projects: { fill:'#EEEDFE', text:'#3C3489' },
   house:    { fill:'#FBEAF0', text:'#72243E' },
   family:   { fill:'#FCEBEB', text:'#791F1F' },
+  personal: { fill:'#E6F1FB', text:'#0C447C' },
+  work:     { fill:'#F1EFE8', text:'#444441' },
+  health:   { fill:'#EAF3DE', text:'#27500A' },
 };
-const CATLABEL = { finance:'Finance', dogs:'Dogs', projects:'Projects', house:'House', family:'Friends & family' };
+const CATLABEL = { finance:'Finance', dogs:'Dogs', projects:'Projects', house:'House', family:'Friends & family', personal:'Personal', work:'Work', health:'Health' };
 const DAY = 86400000;
 
 let items = [];     // open items, rendered in the list
@@ -319,10 +347,6 @@ function parseDate(s) { if (!s) return null; const d = new Date(s); d.setHours(0
 function daysLeft(d) { if (!d) return null; return Math.round((d - today0()) / DAY); }
 function fmt(d) { return d ? d.toLocaleDateString([], { month:'short', day:'numeric' }) : ''; }
 function isoToday(offset) { const d = new Date(today0().getTime() + (offset||0)*DAY); return d.toISOString().slice(0,10); }
-
-// urgency comes back as a STRING ("5.00") or null — parse before use
-function urg(it) { return it.urgency == null ? null : parseFloat(it.urgency); }
-function maxUrg() { let m = 0; items.forEach(it => { const u = urg(it); if (u != null && u > m) m = u; }); return m || 1; }
 
 function ring(imp) {
   // importance as 5 dots, filled left-to-right; empty slot keeps width stable
@@ -356,31 +380,33 @@ function rightControl(it, mx) {
     const cd = dl == null ? '' : (dl > 0 ? 'in '+dl+'d' : (dl === 0 ? 'today' : 'passed'));
     return '<span class="span"><span class="cd">'+cd+'</span> · '+fmt(d)+'</span>';
   }
-  // tasks: urgency now lives entirely in the left strip
+  // task / initiative: show due date if set
+  const d = parseDate(it.due_date);
+  if (d) {
+    const dl = daysLeft(d);
+    const cd = dl == null ? '' : (dl > 0 ? 'in '+dl+'d' : (dl === 0 ? 'today' : 'overdue'));
+    return '<span class="span"><span class="cd">'+cd+'</span> · '+fmt(d)+'</span>';
+  }
   return '';
 }
-// blend light grey -> near-black by urgency fraction; returns {color, pulse}
-function urgencyStrip(it, mx) {
-  const u = urg(it);
-  if (u == null) return { color: 'var(--border)', pulse: false };
-  const f = Math.max(0, Math.min(1, u / mx));
-  // lerp #d8d8d8 (216) -> #111111 (17)
-  const v = Math.round(216 + (17 - 216) * f);
-  const hex = v.toString(16).padStart(2, '0');
-  return { color: '#'+hex+hex+hex, pulse: f >= 0.999 };
+// highlight class for the marker swipe, or null for no highlight.
+// trip -> blue, milestone -> orange, urgent task/initiative -> yellow.
+// is_urgent comes from the server (pinned OR importance>=4 & due within 2 days).
+function highlightClass(it) {
+  if (it.type === 'trip') return 'hl-trip';
+  if (it.type === 'milestone') return 'hl-mile';
+  if (it.is_urgent === true || it.is_urgent === 't') return 'hl-urgent';
+  return null;
 }
-function accentColor(it, mx) {
-  if (it.type === 'trip') return 'var(--trip)';
-  if (it.type === 'milestone') return 'var(--milestone)';
-  return urgencyStrip(it, mx).color;
-}
-function cardBg(it) {
-  return 'var(--bg-card)';
+function titleHtml(it) {
+  const hl = highlightClass(it);
+  const t = esc(it.title);
+  return hl ? '<span class="title"><span class="mark '+hl+'">'+t+'</span></span>'
+            : '<span class="title">'+t+'</span>';
 }
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function render() {
-  const mx = maxUrg();
   const ol = document.getElementById('open-list');
   const shown = items.filter(passesFilter);
   if (!shown.length) {
@@ -390,23 +416,20 @@ function render() {
     shown.forEach(it => {
       const card = document.createElement('div');
       card.className = 'card';
-      card.style.background = cardBg(it);
       const useTaskUI = (it.type === 'task' || it.type === 'initiative');
       const impSlot = useTaskUI ? ring(it.importance) : '<div style="width:48px;flex-shrink:0;"></div>';
       const isOpen = openId === it.id;
-      const strip = useTaskUI ? urgencyStrip(it, mx) : { color: accentColor(it,mx), pulse:false };
       const bodyHtml = (it.body && it.body.trim())
         ? '<div class="bodytext">'+esc(it.body)+'</div>'
         : '<div class="bodytext empty">No description.</div>';
       card.innerHTML =
         '<div class="row" data-row="'+it.id+'">'+
-          '<div class="accent'+(strip.pulse?' pulse':'')+'" style="background:'+strip.color+';"></div>'+
           '<div class="rowbody">'+
             leftControl(it)+
-            '<span class="title">'+esc(it.title)+'</span>'+
+            titleHtml(it)+
             pill(it.category)+
             impSlot+
-            rightControl(it,mx)+
+            rightControl(it)+
             '<button class="editbtn" data-edit="'+it.id+'" aria-label="Edit"><i class="ti ti-pencil"></i></button>'+
             '<i class="ti ti-chevron-down chev" style="transform:rotate('+(isOpen?'180':'0')+'deg);"></i>'+
           '</div>'+
@@ -776,6 +799,7 @@ const modal = {
   due:    document.getElementById('m-due'),
   end:    document.getElementById('m-end'),
   body:   document.getElementById('m-body'),
+  urgent: document.getElementById('m-urgent'),
   save:   document.getElementById('modal-save'),
 };
 let editingId = null;   // null = adding
@@ -787,6 +811,7 @@ function setModalType(t) {
   // importance only for task/initiative; end date only for trip
   modal.fldImp.style.display = (t === 'task' || t === 'initiative') ? 'flex' : 'none';
   modal.fldEnd.style.display = (t === 'trip') ? 'flex' : 'none';
+  document.getElementById('m-fld-urgent').style.display = (t === 'task' || t === 'initiative') ? 'flex' : 'none';
   modal.lblDue.textContent = t === 'trip' ? 'Start' : (t === 'milestone' ? 'Date' : 'Due');
 }
 modal.seg.querySelectorAll('button').forEach(b => {
@@ -806,6 +831,7 @@ function openAdd() {
   modal.due.value = isoToday(7);
   modal.end.value = '';
   modal.body.value = '';
+  modal.urgent.checked = false;
   setModalType('task');
   openModal();
 }
@@ -820,6 +846,7 @@ function openEdit(id) {
   modal.cat.value = it.category || '';
   modal.imp.value = it.importance != null ? String(it.importance) : '3';
   modal.body.value = it.body || '';
+  modal.urgent.checked = it.urgent_pin === true;
   if (it.type === 'trip') {
     modal.due.value = (it.start_date || '').slice(0,10);
     modal.end.value = (it.due_date || '').slice(0,10);
@@ -842,6 +869,7 @@ async function saveModal() {
     due: modal.due.value || null,
     end: modalType === 'trip' ? (modal.end.value || null) : null,
     importance: (modalType === 'task' || modalType === 'initiative') ? modal.imp.value : null,
+    urgent_pin: modal.urgent.checked,
   };
   if (editingId != null) payload.id = editingId;
   modal.save.disabled = true;
@@ -886,6 +914,9 @@ document.querySelectorAll('.tab').forEach(tab => {
     if (t === 'clusters') Orbit.activate();
   };
 });
+
+document.getElementById('today-sub').textContent =
+  new Date().toLocaleDateString([], { weekday:'long', month:'long', day:'numeric' });
 
 load();
 </script>
