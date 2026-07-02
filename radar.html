@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Life HQ — Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Special+Elite&display=swap" rel="stylesheet" />
+<link href="/nav.css" rel="stylesheet" />
+<style>
+  :root {
+    --crt-bg: #050a05;
+    --ph: #00ff41;         /* phosphor green */
+    --ph-dim: rgba(0, 255, 65, .45);
+    --ph-faint: rgba(0, 255, 65, .18);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--crt-bg);
+    color: var(--ph);
+    font-family: "VT323", monospace;
+    min-height: 100vh;
+  }
+  .crt {
+    position: relative;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.2rem 1.5rem 4rem;
+  }
+  /* faint scanline overlay across the whole scope + readout */
+  .crt::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 255, 65, .035) 3px,
+      rgba(0, 0, 0, .12) 4px
+    );
+    z-index: 5;
+  }
+
+  /* ---- scope ---- */
+  .scope {
+    position: relative;
+    width: min(100%, 620px);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+  }
+  .scope svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* sweep wedge: green radial/conic fade trailing a bright sweep line */
+  .sweep {
+    position: absolute;
+    inset: 3.5%;
+    border-radius: 50%;
+    overflow: hidden;
+    background: conic-gradient(
+      from -20deg at 50% 50%,
+      rgba(0, 255, 65, 0) 0deg,
+      rgba(0, 255, 65, .04) 200deg,
+      rgba(0, 255, 65, .30) 300deg,
+      rgba(70, 255, 120, .42) 318deg,
+      rgba(0, 255, 65, 0) 320deg
+    );
+    animation: sweep 9s linear infinite;
+  }
+  /* bright sweep line at the wedge's leading edge */
+  .sweep::before {
+    content: "";
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 50%; height: 2px;
+    transform-origin: 0 50%;
+    transform: rotate(-62deg);
+    background: linear-gradient(to right, rgba(140,255,170,.95), rgba(0,255,65,.25));
+    box-shadow: 0 0 6px rgba(0, 255, 65, .8);
+  }
+  @keyframes sweep { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .sweep { animation: none; }
+  }
+
+  /* ---- readout ---- */
+  .readout {
+    max-width: 860px;
+    margin: 2.4rem auto 0;
+    border-top: 1px solid var(--ph-dim);
+    padding-top: 1.6rem;
+    font-size: 24px;
+    letter-spacing: .14em;
+  }
+  .readout h1 {
+    font-family: inherit;
+    font-weight: 400;
+    font-size: 28px;
+    letter-spacing: .38em;
+    margin: 0 0 1.1rem;
+    text-shadow: 0 0 10px rgba(0, 255, 65, .65);
+  }
+  .contact {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .32rem 0;
+    text-shadow: 0 0 5px rgba(0, 255, 65, .35);
+  }
+  .contact .id::before { content: "> "; color: var(--ph-dim); }
+  .contact .rng { color: var(--ph-dim); }
+  .note {
+    margin-top: 1.5rem;
+    color: var(--ph-faint);
+    font-size: 21px;
+    text-shadow: none;
+  }
+</style>
+</head>
+<body>
+<header class="hq-nav" data-page="radar">
+  <a class="hq-brand" href="/">LIFE HQ</a>
+  <nav class="hq-tabs">
+    <a class="hq-tab" href="/">Journal</a>
+    <a class="hq-tab" href="/daily">Daily</a>
+    <a class="hq-tab active" href="/radar">Radar</a>
+  </nav>
+</header>
+
+<div class="crt">
+  <div class="scope" role="img" aria-label="Radar scope — placeholder">
+    <div class="sweep"></div>
+    <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- concentric range rings -->
+      <circle cx="300" cy="300" r="279" fill="none" stroke="#00ff41" stroke-opacity=".45" stroke-width="1.4"/>
+      <circle cx="300" cy="300" r="210" fill="none" stroke="#00ff41" stroke-opacity=".28" stroke-width="1"/>
+      <circle cx="300" cy="300" r="140" fill="none" stroke="#00ff41" stroke-opacity=".28" stroke-width="1"/>
+      <circle cx="300" cy="300" r="70"  fill="none" stroke="#00ff41" stroke-opacity=".28" stroke-width="1"/>
+      <!-- crosshair lines -->
+      <line x1="300" y1="21" x2="300" y2="579" stroke="#00ff41" stroke-opacity=".22" stroke-width="1"/>
+      <line x1="21" y1="300" x2="579" y2="300" stroke="#00ff41" stroke-opacity=".22" stroke-width="1"/>
+      <!-- static contact blips -->
+      <circle cx="386" cy="212" r="7"   fill="#3dff74" fill-opacity=".95"/>
+      <circle cx="232" cy="376" r="5.5" fill="#00ff41" fill-opacity=".75"/>
+      <circle cx="355" cy="404" r="4.5" fill="#00ff41" fill-opacity=".55"/>
+      <circle cx="196" cy="242" r="3.5" fill="#00ff41" fill-opacity=".4"/>
+    </svg>
+  </div>
+
+  <div class="readout">
+    <h1>RADAR</h1>
+    <div class="contact"><span class="id">CONTACT 01</span><span class="rng">14 KM</span></div>
+    <div class="contact"><span class="id">CONTACT 02</span><span class="rng">31 KM</span></div>
+    <div class="contact"><span class="id">CONTACT 03</span><span class="rng">52 KM</span></div>
+    <div class="note">// awaiting scope definition</div>
+  </div>
+</div>
+</body>
+</html>

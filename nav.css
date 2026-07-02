@@ -1,0 +1,85 @@
+/* ==========================================================================
+   Life HQ — shared top navigation
+   Scoped entirely under .hq-nav so it can be safely injected into the
+   n8n-generated /daily document without style bleed in either direction.
+   Every inheritable property the nav depends on is set explicitly.
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+
+.hq-nav,
+.hq-nav * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.hq-nav {
+  /* flat charcoal band — no dot grid */
+  height: 50px;
+  background: #2c2a26;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 0 22px;
+  font-family: 'Special Elite', 'Courier New', monospace;
+  line-height: 1;
+  position: relative;
+  z-index: 20;
+}
+
+.hq-brand {
+  color: #f3f1e8;
+  font-size: 20px;
+  letter-spacing: 2px;
+  text-decoration: none;
+  white-space: nowrap;
+  padding-bottom: 2px;
+}
+
+/* Trapper Keeper folder tabs, hanging from the bottom edge of the band */
+.hq-tabs {
+  align-self: flex-end;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100%;
+}
+
+.hq-tab {
+  display: flex;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  /* inactive: darker charcoal, muted text, sitting slightly higher */
+  background: #4a453d;
+  color: #a79f90;
+  padding: 6px 16px 7px;
+  margin-bottom: 6px;
+  transition: color .12s;
+}
+.hq-tab:not(.active):hover { color: #e8e2d4; }
+
+/* active: adopts the palette of the page below and sits flush — bleeds into it */
+.hq-tab.active {
+  font-size: 14px;
+  padding: 9px 18px 10px;
+  margin-bottom: 0;
+}
+.hq-nav[data-page="journal"] .hq-tab.active { background: #fbfaf5; color: #2b2a28; }
+.hq-nav[data-page="daily"]   .hq-tab.active { background: #ffffff; color: #1a1a1a; }
+.hq-nav[data-page="radar"]   .hq-tab.active {
+  background: #050a05;
+  color: #00ff41;
+  text-shadow: 0 0 6px rgba(0, 255, 65, .55);
+}
+
+@media (max-width: 480px) {
+  .hq-nav { padding: 0 8px 0 14px; }
+  .hq-brand { font-size: 17px; letter-spacing: 1px; }
+  .hq-tab { padding: 6px 11px 7px; font-size: 12px; }
+  .hq-tab.active { padding: 9px 13px 10px; font-size: 13px; }
+}
