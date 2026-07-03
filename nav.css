@@ -69,6 +69,7 @@
   padding: 9px 18px 10px;
   margin-bottom: 0;
 }
+.hq-nav[data-page="tasks"]   .hq-tab.active { background: #fbfaf5; color: #2b2a28; }
 .hq-nav[data-page="journal"] .hq-tab.active { background: #fbfaf5; color: #2b2a28; }
 .hq-nav[data-page="daily"]   .hq-tab.active { background: #ffffff; color: #1a1a1a; }
 .hq-nav[data-page="radar"]   .hq-tab.active {
