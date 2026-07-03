@@ -24,8 +24,14 @@
   }
 
   .wrap { max-width:720px; margin:0 auto; padding:1.4rem 1.25rem 2rem; }
+  .todayrow { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:1.2rem; }
   .today { font-family:var(--font-type); font-size:11px; color:var(--text-3);
-    letter-spacing:.05em; text-transform:uppercase; margin-bottom:1.2rem; }
+    letter-spacing:.05em; text-transform:uppercase; }
+  .todaytools { display:flex; align-items:baseline; gap:10px; }
+  #clear, #recall { font-family:var(--font-type); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--text-3); background:none; border:none; cursor:pointer; padding:2px 4px; height:auto;
+    border-radius:4px; opacity:.55; transition:opacity .15s, color .15s; }
+  #clear:hover, #recall:hover { opacity:1; color:var(--text-2); background:none; }
 
   #paper { min-height:340px; padding:4px 2px 8px; }
 
@@ -33,6 +39,7 @@
   .me { font-family:var(--font-hand); font-size:22px; line-height:1.4; color:var(--text-1);
     margin:2px 0 12px; }
   .me .arrow { color:var(--text-3); margin-right:8px; }
+  .me .word { display:inline-block; white-space:nowrap; }
   .me span.ch { display:inline-block; white-space:pre-wrap; }
 
   /* the journal's typewriter voice */
@@ -74,7 +81,13 @@
   </header>
 
   <div class="wrap">
-    <div class="today" id="today"></div>
+    <div class="todayrow">
+      <div class="today" id="today"></div>
+      <div class="todaytools">
+        <button id="recall" title="Show today's notes">recall today</button>
+        <button id="clear" title="Clear the screen (Esc) — your notes stay saved">clear</button>
+      </div>
+    </div>
     <div id="paper"></div>
 
     <div class="composer">
@@ -86,6 +99,8 @@
 (function(){
   var paper = document.getElementById('paper');
   var inp = document.getElementById('inp');
+  var clearBtn = document.getElementById('clear');
+  var recallBtn = document.getElementById('recall');
 
   var SESSION_ID = (crypto.randomUUID) ? crypto.randomUUID()
     : 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2);
@@ -104,19 +119,31 @@
   function tagColors(label){ return TAGS[label] || TAGS.task; }
 
   // --- render: your handwriting ---------------------------------------------
+  function jitterChar(chr){
+    var s = document.createElement('span');
+    s.className='ch';
+    s.textContent = chr;
+    var rot=(Math.random()*2.4-1.2).toFixed(2), dy=(Math.random()*2.2-1.1).toFixed(2);
+    s.style.transform='rotate('+rot+'deg) translateY('+dy+'px)';
+    return s;
+  }
   function writeHand(text){
     var wrap = document.createElement('div');
     wrap.className = 'me';
     var a = document.createElement('span'); a.className='arrow'; a.textContent='\u203A';
     wrap.appendChild(a);
-    for (var i=0;i<text.length;i++){
-      var s = document.createElement('span');
-      s.className='ch';
-      s.textContent = text[i]===' ' ? '\u00A0' : text[i];
-      var rot=(Math.random()*2.4-1.2).toFixed(2), dy=(Math.random()*2.2-1.1).toFixed(2);
-      s.style.transform='rotate('+rot+'deg) translateY('+dy+'px)';
-      wrap.appendChild(s);
-    }
+    // split on spaces; each word is a non-breaking unit, spaces are breakable gaps
+    var parts = text.split(' ');
+    parts.forEach(function(word, wi){
+      if(word.length){
+        var w = document.createElement('span');
+        w.className = 'word';
+        for(var i=0;i<word.length;i++) w.appendChild(jitterChar(word[i]));
+        wrap.appendChild(w);
+      }
+      // add a real space between words (not after the last)
+      if(wi < parts.length-1) wrap.appendChild(document.createTextNode(' '));
+    });
     paper.appendChild(wrap);
   }
 
@@ -252,7 +279,14 @@
     fetch('/api/notes/today')
       .then(function(r){ return r.json(); })
       .then(function(rows){
-        if(!Array.isArray(rows)) return;
+        paper.innerHTML = '';
+        if(!Array.isArray(rows) || !rows.length){
+          var empty = document.createElement('div');
+          empty.className = 'agent';
+          empty.textContent = 'No notes yet today.';
+          paper.appendChild(empty);
+          return;
+        }
         rows.forEach(function(n){
           writeHand(n.content);
           renderTags(n.tags, n.id);
@@ -287,7 +321,25 @@
     }
   });
 
-  loadToday();
+  // --- clear the screen (notes stay in the DB; use 'recall today' to bring them back) --------
+  function clearScreen(){
+    closeMenus();
+    paper.innerHTML = '';
+    inp.value = '';
+    autoGrow();
+    inp.focus();
+  }
+  clearBtn.addEventListener('click', clearScreen);
+  recallBtn.addEventListener('click', loadToday);
+  // Esc = instant panic-clear (unless a tag menu is open, then just close that)
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){
+      if(document.querySelector('.tagmenu')){ closeMenus(); return; }
+      clearScreen();
+    }
+  });
+
+  // page starts blank on purpose — notes surface only via 'recall today' or the agent
   inp.focus();
 })();
 </script>
