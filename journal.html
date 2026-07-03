@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Life HQ — Journal</title>
+<link rel="stylesheet" href="/nav.css" />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-page:#fbfaf5; --bg-surface:#f3f1e8; --text-1:#2b2a28; --text-2:#5a554c;
+    --text-3:#9a968a; --border:#e0ddd2; --border-2:#cdc9bb; --dot:#d6d2c4;
+    --ink-agent:#5a554c;
+    --font-hand:"Caveat","Bradley Hand",cursive;
+    --font-type:"Special Elite","Courier New",monospace;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--bg-page); color:var(--text-1);
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle, var(--dot) 0.8px, transparent 0.8px);
+    background-size:20px 20px;
+    min-height:100vh;
+  }
+
+  .wrap { max-width:720px; margin:0 auto; padding:1.4rem 1.25rem 2rem; }
+  .today { font-family:var(--font-type); font-size:11px; color:var(--text-3);
+    letter-spacing:.05em; text-transform:uppercase; margin-bottom:1.2rem; }
+
+  #paper { min-height:340px; padding:4px 2px 8px; }
+
+  /* your hand */
+  .me { font-family:var(--font-hand); font-size:27px; line-height:1.3; color:var(--text-1);
+    margin:2px 0 12px; display:flex; align-items:baseline; flex-wrap:wrap; }
+  .me .arrow { color:var(--text-3); margin-right:8px; }
+  .me span.ch { display:inline-block; white-space:pre-wrap; }
+
+  /* the journal's typewriter voice */
+  .agent { font-family:var(--font-type); font-size:15px; line-height:1.75; color:var(--ink-agent);
+    margin:0 0 8px; padding-left:14px; border-left:2px solid var(--border); white-space:pre-wrap; }
+  .caret { color:#b0a999; }
+
+  .tags { margin:0 0 22px 14px; position:relative; }
+  .tag { font-family:var(--font-type); font-size:10px; letter-spacing:.5px; padding:2px 8px;
+    border-radius:999px; margin-right:6px; text-transform:uppercase; display:inline-block; }
+  .tag.tappable { cursor:pointer; }
+  .tag.tappable:hover { outline:1px solid var(--border-2); }
+  .tagmenu { position:absolute; background:var(--bg-page); border:1px solid var(--border-2);
+    border-radius:8px; padding:4px; z-index:10; box-shadow:0 2px 10px rgba(43,42,40,.08); }
+  .tagmenu button { display:block; width:100%; text-align:left; border:none; background:none;
+    font-family:var(--font-type); font-size:11px; letter-spacing:.5px; text-transform:uppercase;
+    color:var(--text-2); padding:5px 10px; border-radius:5px; cursor:pointer; }
+  .tagmenu button:hover { background:var(--bg-surface); color:var(--text-1); }
+
+  .thinking { font-family:var(--font-type); font-size:15px; color:var(--text-3);
+    padding-left:14px; border-left:2px solid var(--border); margin:0 0 8px; }
+
+  .composer { display:flex; align-items:flex-end; gap:8px; margin-top:14px; }
+  #inp { flex:1; outline:none; border:none; resize:none; background:transparent;
+    font-family:var(--font-hand); font-size:24px; line-height:1.3; color:var(--text-1);
+    min-height:30px; max-height:180px; padding:0; overflow-y:hidden; }
+  #inp::placeholder { color:var(--text-3); font-family:var(--font-hand); font-size:24px; }
+  #send { flex-shrink:0; width:26px; height:26px; border:none; border-radius:50%;
+    background:transparent; color:var(--text-3);
+    font-size:14px; line-height:1; cursor:pointer; display:flex; align-items:center;
+    justify-content:center; padding:0; margin-bottom:4px; transition:color .15s, background .15s; }
+  #send:hover { color:var(--text-1); background:var(--bg-surface); }
+  #send:active { transform:scale(.92); }
+</style>
+</head>
+<body>
+  <header class="hq-nav" data-page="journal">
+    <a class="hq-brand" href="/">LIFE HQ</a>
+    <nav class="hq-tabs">
+      <a class="hq-tab" href="/">Tasks</a>
+      <a class="hq-tab active" href="/journal">Journal</a>
+      <a class="hq-tab" href="/daily">Daily</a>
+      <a class="hq-tab" href="/radar">Radar</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <div class="today" id="today"></div>
+    <div id="paper"></div>
+
+    <div class="composer">
+      <textarea id="inp" rows="1" spellcheck="false" placeholder="write a thought, a task, an idea…"></textarea>
+      <button id="send" aria-label="Send" title="Send">&uarr;</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  var paper = document.getElementById('paper');
+  var inp = document.getElementById('inp');
+  var send = document.getElementById('send');
+
+  var SESSION_ID = (crypto.randomUUID) ? crypto.randomUUID()
+    : 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+
+  document.getElementById('today').textContent =
+    new Date().toLocaleDateString([], { weekday:'long', month:'long', day:'numeric' });
+
+  var TAGS = {
+    captured:['#E1F5EE','#0F6E56'], task:['#F1EFE8','#444441'],
+    thought:['#EEEDFE','#3C3489'], dogs:['#FAEEDA','#854F0B'],
+    initiative:['#E6F1FB','#0C447C']
+  };
+  // tags you can reclassify between by tapping
+  var SWAPPABLE = ['task','thought'];
+
+  function tagColors(label){ return TAGS[label] || TAGS.task; }
+
+  // --- render: your handwriting ---------------------------------------------
+  function writeHand(text){
+    var wrap = document.createElement('div');
+    wrap.className = 'me';
+    var a = document.createElement('span'); a.className='arrow'; a.textContent='\u203A';
+    wrap.appendChild(a);
+    for (var i=0;i<text.length;i++){
+      var s = document.createElement('span');
+      s.className='ch';
+      s.textContent = text[i]===' ' ? '\u00A0' : text[i];
+      var rot=(Math.random()*2.4-1.2).toFixed(2), dy=(Math.random()*2.2-1.1).toFixed(2);
+      s.style.transform='rotate('+rot+'deg) translateY('+dy+'px)';
+      wrap.appendChild(s);
+    }
+    paper.appendChild(wrap);
+  }
+
+  // --- render: tag pills (tappable when tied to a note row) ------------------
+  function renderTags(tags, noteId){
+    if(!tags || !tags.length) return;
+    var t = document.createElement('div');
+    t.className = 'tags';
+    if(noteId != null) t.dataset.noteId = noteId;
+    tags.forEach(function(label){
+      var c = tagColors(label);
+      var pill = document.createElement('span');
+      pill.className = 'tag';
+      pill.textContent = label;
+      pill.style.background = c[0];
+      pill.style.color = c[1];
+      if(noteId != null && SWAPPABLE.indexOf(label) > -1){
+        pill.classList.add('tappable');
+        pill.addEventListener('click', function(e){
+          e.stopPropagation();
+          openTagMenu(t, pill, label, noteId, tags);
+        });
+      }
+      t.appendChild(pill);
+    });
+    paper.appendChild(t);
+  }
+
+  function closeMenus(){
+    document.querySelectorAll('.tagmenu').forEach(function(m){ m.remove(); });
+  }
+  document.addEventListener('click', closeMenus);
+
+  function openTagMenu(container, pill, currentLabel, noteId, tags){
+    closeMenus();
+    var menu = document.createElement('div');
+    menu.className = 'tagmenu';
+    SWAPPABLE.filter(function(l){ return l !== currentLabel; }).forEach(function(target){
+      var btn = document.createElement('button');
+      btn.textContent = '\u2192 ' + target;
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var newTags = tags.map(function(l){ return l === currentLabel ? target : l; });
+        fetch('/api/notes/' + noteId, {
+          method:'PATCH',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ tags:newTags })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(row){
+          if(!row || !Array.isArray(row.tags)) return;
+          // rebuild the pill row in place with the server-confirmed tags
+          var rebuilt = document.createElement('div');
+          rebuilt.className = 'tags';
+          rebuilt.dataset.noteId = noteId;
+          container.replaceWith(rebuilt);
+          row.tags.forEach(function(label){
+            var c = tagColors(label);
+            var p = document.createElement('span');
+            p.className = 'tag'; p.textContent = label;
+            p.style.background = c[0]; p.style.color = c[1];
+            if(SWAPPABLE.indexOf(label) > -1){
+              p.classList.add('tappable');
+              p.addEventListener('click', function(ev){
+                ev.stopPropagation();
+                openTagMenu(rebuilt, p, label, noteId, row.tags);
+              });
+            }
+            rebuilt.appendChild(p);
+          });
+        })
+        .catch(function(){ /* leave pills as they were on failure */ });
+        closeMenus();
+      });
+      menu.appendChild(btn);
+    });
+    container.appendChild(menu);
+  }
+
+  // --- render: typewriter reply ----------------------------------------------
+  function typeReply(text, tags, noteId, done){
+    var line=document.createElement('div'); line.className='agent';
+    paper.appendChild(line);
+    var caret=document.createElement('span'); caret.className='caret'; caret.textContent='\u2588';
+    line.appendChild(caret);
+    var i=0;
+    (function tick(){
+      if(i<text.length){
+        caret.insertAdjacentText('beforebegin', text[i]);
+        i++;
+        window.scrollTo(0, document.body.scrollHeight);
+        var speed = text.length>120 ? 10 : 24;
+        setTimeout(tick, speed + Math.random()*36);
+      } else {
+        caret.remove();
+        renderTags(tags, noteId);
+        window.scrollTo(0, document.body.scrollHeight);
+        if(done) done();
+      }
+    })();
+  }
+
+  // --- the real agent turn -----------------------------------------------------
+  function agentTurn(userText){
+    var think = document.createElement('div');
+    think.className='thinking'; think.textContent='\u2026';
+    paper.appendChild(think);
+    var dots=0;
+    var thinkTimer = setInterval(function(){ dots=(dots+1)%4; think.textContent='.'.repeat(dots||1); },300);
+
+    fetch('/api/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ text:userText, session_id:SESSION_ID })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      clearInterval(thinkTimer); think.remove();
+      if(data && data.error){
+        typeReply('(something went wrong: ' + data.error + ')', null, null);
+        return;
+      }
+      typeReply(data.reply || '(no reply)', data.tags, data.note_id != null ? data.note_id : null);
+    })
+    .catch(function(err){
+      clearInterval(thinkTimer); think.remove();
+      typeReply('(couldn\u2019t reach the agent \u2014 ' + err.message + ')', null, null);
+    });
+  }
+
+  // --- load today's captures on open -------------------------------------------
+  function loadToday(){
+    fetch('/api/notes/today')
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        if(!Array.isArray(rows)) return;
+        rows.forEach(function(n){
+          writeHand(n.content);
+          renderTags(n.tags, n.id);
+        });
+        window.scrollTo(0, document.body.scrollHeight);
+      })
+      .catch(function(){ /* empty page is fine */ });
+  }
+
+  // --- composer ------------------------------------------------------------------
+  function submit(){
+    var text=inp.value.trim();
+    if(!text) return;
+    writeHand(text);
+    inp.value='';
+    autoGrow();
+    window.scrollTo(0, document.body.scrollHeight);
+    agentTurn(text);
+  }
+
+  function autoGrow(){
+    inp.style.height='auto';
+    inp.style.height=Math.min(inp.scrollHeight, 180)+'px';
+  }
+
+  send.addEventListener('click', submit);
+  inp.addEventListener('input', autoGrow);
+  inp.addEventListener('keydown', function(e){
+    // Enter alone = newline. Cmd/Ctrl+Enter = send.
+    if(e.key==='Enter' && (e.metaKey || e.ctrlKey)){
+      e.preventDefault();
+      submit();
+    }
+  });
+
+  loadToday();
+  inp.focus();
+})();
+</script>
+</body>
+</html>
