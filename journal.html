@@ -85,7 +85,6 @@
 
     <div class="composer">
       <textarea id="inp" rows="1" spellcheck="false" placeholder="write a thought, a task, an idea…"></textarea>
-      <button id="send" aria-label="Send" title="Send">&uarr;</button>
     </div>
   </div>
 
@@ -93,7 +92,6 @@
 (function(){
   var paper = document.getElementById('paper');
   var inp = document.getElementById('inp');
-  var send = document.getElementById('send');
 
   var SESSION_ID = (crypto.randomUUID) ? crypto.randomUUID()
     : 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2);
@@ -286,11 +284,9 @@
     inp.style.height=Math.min(inp.scrollHeight, 180)+'px';
   }
 
-  send.addEventListener('click', submit);
-  inp.addEventListener('input', autoGrow);
-  inp.addEventListener('keydown', function(e){
-    // Enter alone = newline. Cmd/Ctrl+Enter = send.
-    if(e.key==='Enter' && (e.metaKey || e.ctrlKey)){
+inp.addEventListener('keydown', function(e){
+    // Enter = send. Shift+Enter = newline.
+    if(e.key==='Enter' && !e.shiftKey){
       e.preventDefault();
       submit();
     }
